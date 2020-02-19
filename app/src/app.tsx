@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { ConfigProvider } from 'antd'
-import zhCN from 'antd/es/locale/zh_CN'
+import koKr from 'antd/es/locale/ko_KR'
 
 import { AppRouter, AppLayout } from '@/src/components'
 
@@ -13,7 +13,7 @@ interface AppProps {
 export default class App extends React.Component<AppProps> {
   render() {
     return (
-      <ConfigProvider locale={zhCN}>
+      <ConfigProvider locale={koKr}>
         <AppLayout createConfig={this.props.createConfig}>
           <AppRouter routes={routes} store={$store} />
         </AppLayout>
