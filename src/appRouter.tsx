@@ -1,10 +1,10 @@
 import * as React from 'react';
 import { BrowserRouter, Route, Switch, Redirect } from 'react-router-dom';
-import login from './screens/welcome/login';
-import registration from './screens/welcome/registration';
-import appLayout from './screens/appLayout';
 import { useContext } from 'react';
 import { RootContext } from './appContext';
+import LoginScreen from './screens/welcome/login'
+import AppLayout from './screens/appLayout'
+import RegistrationScreen from './screens/welcome/registration'
 
 const AppRouter = () => {
   const { authenticated } = useContext(RootContext);
@@ -13,7 +13,7 @@ const AppRouter = () => {
     <BrowserRouter>
       <Switch>
         <Route path="/login" component={LoginScreen} />
-        <Route path="/registration" component={RegistrationPage} />
+        <Route path="/registration" component={RegistrationScreen} />
         <Route
           path="/"
           render={() => (!authenticated ? <AppLayout /> : <Redirect to={'/login'} />)}

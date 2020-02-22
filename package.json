@@ -130,7 +130,7 @@
     "antd": "^3.26.11",
     "puppeteer": "^2.1.1",
     "react": "^16.8.0-alpha.0",
-    "react-dom": "^16.8.0-alpha.0",
+    "react-dom": "npm:@hot-loader/react-dom",
     "react-router-dom": "^5.1.2",
     "styled-components": "^5.0.1"
   }

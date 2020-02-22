@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { Button, Col, Layout, Row, Table } from 'antd';
-import styledComponents from 'styled-components';
+import styled from 'styled-components';
 import { Link } from 'react-router-dom';
 
 import {

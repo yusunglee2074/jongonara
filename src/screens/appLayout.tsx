@@ -2,13 +2,13 @@ import * as React from 'react';
 import { useState } from 'react';
 import { Layout, Menu, Icon } from 'antd';
 import { Link, Route, RouteComponentProps, Switch, withRouter } from 'react-router-dom';
-import home from './home';
-import naverId from './settings/naverId';
-import naverCafeAndBoard from './settings/naverCafeAndBoard';
-import template from './settings/template';
-import profile from './profile/profile';
-import contact from './contact/contact';
-import working from './settings/working';
+import NaverIdScreen from './settings/naverId'
+import NaverCafeAndBoardScreen from './settings/naverCafeAndBoard'
+import TemplateScreen from './settings/template'
+import WorkingScreen from './settings/working'
+import ContactScreen from './contact/contact'
+import ProfileScreen from './profile/profile'
+import HomeScreen from './home'
 
 const { Sider } = Layout;
 
@@ -52,7 +52,7 @@ const AppLayout: React.FunctionComponent<RouteComponentProps> = ({ location }) =
           <Route path="/setting/working" component={WorkingScreen} />
           <Route path="/contact" component={ContactScreen} />
           <Route path="/profile" component={ProfileScreen} />
-          <Route path="/" component={Home} />
+          <Route path="/" component={HomeScreen} />
         </Switch>
       </Layout>
     </Layout>

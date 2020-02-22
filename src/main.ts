@@ -42,28 +42,9 @@ const createWindow = async () => {
   }
 
   /* 로그인 후 카페 목록 가져오기까지
-  function getChromiumExecPath() {
-    const text = puppeteer.executablePath().replace('app.asar', 'app.asar.unpacked/node_modules/puppeteer');
-    return text.replace('/dist', '/node_modules/puppeteer');
-  }
 
   try {
-    const args = [
-      '--no-sandbox',
-      '--disable-setuid-sandbox',
-      '--disable-infobars',
-      '--window-position=0,0',
-      '--ignore-certifcate-errors',
-      '--ignore-certifcate-errors-spki-list',
-      '--user-agent="Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/65.0.3312.0 Safari/537.36"'
-    ];
 
-    const options = {
-      args,
-      headless: true,
-      ignoreHTTPSErrors: true,
-      userDataDir: './tmp'
-    };
     const browser = await puppeteer.launch({
       ...options,
       executablePath: getChromiumExecPath(),
@@ -111,6 +92,7 @@ const createWindow = async () => {
   win.on('closed', () => {
     win = null;
   });
+
 };
 
 app.on('ready', async () => {
@@ -118,9 +100,12 @@ app.on('ready', async () => {
 });
 
 app.on('window-all-closed', () => {
-  if (process.platform !== 'darwin') {
-    app.quit();
-  }
+  // 크로미니엄 종료 이벤트 발생
+  win && win.webContents.on('did-finish-load', () => {
+    win && win.webContents.send('quit');
+  });
+
+  app.quit();
 });
 
 app.on('activate', async () => {
