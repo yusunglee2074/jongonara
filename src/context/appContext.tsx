@@ -40,6 +40,18 @@ interface IContextDefaultValue {
   setMainPuppeteer: Function;
 }
 
+interface INaverIds {
+  naverId: string;
+}
+
+interface INaverCafe {
+  naverId: string;
+  cafeId: string;
+  cafeName: string;
+  cafeBoardId: string;
+  cafeBoardName: string;
+}
+
 const RootContext = React.createContext({} as IContextDefaultValue);
 
 const RootContextProvider = ({ children }: IProps) => {

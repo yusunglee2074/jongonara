@@ -2,7 +2,7 @@ import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 import { AppContainer } from 'react-hot-loader';
 import 'antd/dist/antd.css';
-import { RootContextProvider } from './appContext';
+import { RootContextProvider } from './context/appContext';
 import AppRouter from './appRouter'
 
 // Create main element
