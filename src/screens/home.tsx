@@ -72,7 +72,7 @@ const HomeScreen: React.FunctionComponent = () => {
               }}
               bordered={true}
               size={'small'}
-              title={() => <Step text="네이버 ID" goto={'/setting/naver-id'} />}
+              title={() => <Step text="네이버 ID" goto={'/setting-naver-id'} />}
               locale={{
                 emptyText: '데이터 없음'
               }}
@@ -88,7 +88,7 @@ const HomeScreen: React.FunctionComponent = () => {
               }}
               bordered={true}
               size={'small'}
-              title={() => <Step text="카페, 게시판" goto={'/setting/naver-cafe'} />}
+              title={() => <Step text="카페, 게시판" goto={'/setting-naver-cafe'} />}
               locale={{
                 emptyText: '데이터 없음'
               }}
@@ -104,7 +104,7 @@ const HomeScreen: React.FunctionComponent = () => {
                 y: true
               }}
               size={'small'}
-              title={() => <Step text="작성 글 템플릿" goto={'/setting/template'} />}
+              title={() => <Step text="작성 글 템플릿" goto={'/setting-template'} />}
               locale={{
                 emptyText: '데이터 없음'
               }}
@@ -121,7 +121,7 @@ const HomeScreen: React.FunctionComponent = () => {
               y: true
             }}
             size={'small'}
-            title={() => <Step text="작업 설정" goto={'/setting/working'} />}
+            title={() => <Step text="작업 설정" goto={'/setting-working'} />}
             locale={{
               emptyText: '데이터 없음'
             }}

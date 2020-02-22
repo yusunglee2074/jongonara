@@ -1,14 +1,10 @@
 import * as React from 'react';
-import { ReactNode, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { remote, ipcRenderer } from 'electron';
 import { Page, Browser } from 'puppeteer';
 import { PUPPETEER_BROWSER_OPTIONS_ARGS } from '../constants';
 
 const puppeteer = remote.require('puppeteer');
-
-interface IProps {
-  children: ReactNode;
-}
 
 interface IPageProcesses {
   page: Page;
@@ -83,7 +79,7 @@ interface ILog {
 
 const RootContext = React.createContext({} as IContextDefaultValue);
 
-const RootContextProvider = ({ children }: IProps) => {
+const RootContextProvider = (props: any) => {
   const [authenticated, setAuthenticated] = useState(false);
   const [contextUser, setContextUser] = useState({});
   const [mainPuppeteer, setMainPuppeteer] = useState({} as IMainPuppeteer);
@@ -174,7 +170,7 @@ const RootContextProvider = ({ children }: IProps) => {
     setLogs,
   };
 
-  return <RootContext.Provider value={value}>{children}</RootContext.Provider>;
+  return <RootContext.Provider value={value}>{props.children}</RootContext.Provider>;
 };
 
 export { RootContext, RootContextProvider };

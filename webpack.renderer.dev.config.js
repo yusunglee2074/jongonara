@@ -18,6 +18,11 @@ module.exports = merge.smart(baseConfig, {
         ]
     },
     plugins: [new webpack.NamedModulesPlugin(), new webpack.HotModuleReplacementPlugin()],
+    resolve: {
+        alias: {
+            'react-dom': '@hot-loader/react-dom'
+        }
+    },
     devServer: {
         port: 2003,
         compress: true,
@@ -28,7 +33,7 @@ module.exports = merge.smart(baseConfig, {
         headers: { 'Access-Control-Allow-Origin': '*' },
         historyApiFallback: {
             verbose: true,
-            disableDotRule: true,
+            disableDotRule: false,
         },
         before() {
             if (process.env.START_HOT) {

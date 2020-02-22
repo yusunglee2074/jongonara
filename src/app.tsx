@@ -1,9 +1,10 @@
+import 'react-hot-loader';
+import { AppContainer } from 'react-hot-loader';
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
-import { AppContainer } from 'react-hot-loader';
 import 'antd/dist/antd.css';
 import { RootContextProvider } from './context/appContext';
-import AppRouter from './appRouter'
+import AppRouter from './appRouter';
 
 // Create main element
 const mainElement = document.createElement('div');
@@ -26,8 +27,8 @@ render(AppRouter);
 // Hot Module Replacement API
 if (typeof module.hot !== 'undefined') {
   module.hot.accept('./appRouter', () => {
-    import('./appRouter').then(router => {
-      render(router.default);
+    import('./appRouter').then(World => {
+      render(World.default);
     });
   });
 }
