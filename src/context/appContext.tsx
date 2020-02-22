@@ -136,6 +136,13 @@ const RootContextProvider = ({ children }: IProps) => {
       ipcRenderer.on('quit', async (event: string) => {
         console.log(event);
         if (event === 'quit') {
+          const pages = await mainPuppeteer.browser.pages();
+          const promiseArr = [];
+          for (let i = 0; i < pages.length; i++) {
+            const page = pages[i]
+            promiseArr.push(page.close());
+          }
+          await Promise.all(promiseArr);
           await mainPuppeteer.browser.close();
         }
       });
