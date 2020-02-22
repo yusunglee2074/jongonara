@@ -1,7 +1,6 @@
 import * as React from 'react';
 import { Button, Col, Layout, Row, Table } from 'antd';
 import styled from 'styled-components';
-import { Link } from 'react-router-dom';
 
 import {
   HOME_SCREEN_CAFE_TABLE_COL,
@@ -10,22 +9,11 @@ import {
   HOME_SCREEN_TEMPLATE_TABLE_COL,
   HOME_SCREEN_WORKING_TABLE_COL
 } from '../constants';
+import Step from '../components/Step'
 
 const { Header, Content } = Layout;
 
 const S = {
-  StepDiv: styled.div`
-    vertical-align: middle;
-  `,
-  StepTitleSpan: styled.span`
-    font-size: 1.7rem;
-  `,
-  StepSettingA: styled.a`
-    font-size: 1rem;
-  `,
-  StepLink: styled(Link)`
-    margin-left: 1rem;
-  `,
   HeaderButton: styled(Button)`
     margin-right: 1rem;
     font-size: 1.3rem;
@@ -37,7 +25,10 @@ const S = {
   `,
   TableCol: styled(Col)`
     margin-bottom: 2rem;
-  `
+  `,
+  StepTitleSpan: styled.span`
+    font-size: 1.7rem;
+  `,
 };
 
 const HomeScreen: React.FunctionComponent = () => {
@@ -74,7 +65,7 @@ const HomeScreen: React.FunctionComponent = () => {
               size={'small'}
               title={() => <Step text="네이버 ID" goto={'/setting-naver-id'} />}
               locale={{
-                emptyText: '데이터 없음'
+                emptyText: '최소 하나의 데이터를 넣어주세요.'
               }}
             />
           </S.TableCol>
@@ -90,7 +81,7 @@ const HomeScreen: React.FunctionComponent = () => {
               size={'small'}
               title={() => <Step text="카페, 게시판" goto={'/setting-naver-cafe'} />}
               locale={{
-                emptyText: '데이터 없음'
+                emptyText: '최소 하나의 데이터를 넣어주세요.'
               }}
             />
           </S.TableCol>
@@ -106,7 +97,7 @@ const HomeScreen: React.FunctionComponent = () => {
               size={'small'}
               title={() => <Step text="작성 글 템플릿" goto={'/setting-template'} />}
               locale={{
-                emptyText: '데이터 없음'
+                emptyText: '최소 하나의 데이터를 넣어주세요.'
               }}
             />
           </S.TableCol>
@@ -123,7 +114,7 @@ const HomeScreen: React.FunctionComponent = () => {
             size={'small'}
             title={() => <Step text="작업 설정" goto={'/setting-working'} />}
             locale={{
-              emptyText: '데이터 없음'
+              emptyText: '최소 하나의 데이터를 넣어주세요.'
             }}
           />
         </S.TableCol>
@@ -144,7 +135,7 @@ const HomeScreen: React.FunctionComponent = () => {
               </>
             )}
             locale={{
-              emptyText: '데이터 없음'
+              emptyText: '최 하나의 데이터를 넣어주세요.'
             }}
           />
         </S.TableCol>
@@ -153,20 +144,5 @@ const HomeScreen: React.FunctionComponent = () => {
   );
 };
 
-const Step: React.FunctionComponent<{
-  text: string;
-  goto: string;
-}> = ({ text, goto }) => {
-  return (
-    <S.StepDiv>
-      <Row type="flex" style={{ alignItems: 'center' }}>
-        <S.StepTitleSpan>{text}</S.StepTitleSpan>
-        <S.StepLink to={goto}>
-          <Button icon="setting" />
-        </S.StepLink>
-      </Row>
-    </S.StepDiv>
-  );
-};
 
 export default HomeScreen;

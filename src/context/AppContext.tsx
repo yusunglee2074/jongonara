@@ -104,29 +104,27 @@ const RootContextProvider = (props: any) => {
         ignoreHTTPSErrors: true,
         userDataDir: './tmp'
       };
-      if (!mainPuppeteer.browser) {
-        const browser = await puppeteer.launch({
-          ...options,
-          executablePath: getChromiumExecPath(),
-          headless: false
-        });
+      const browser = await puppeteer.launch({
+        ...options,
+        executablePath: getChromiumExecPath(),
+        headless: false
+      });
 
-        const initialPages: Array<Page> = await browser.pages();
-        const pageProcesses: Array<IPageProcesses> = [
-          {
-            page: initialPages[0],
-            naverId: null,
-            status: null,
-            cronId: null
-          }
-        ];
+      const initialPages: Array<Page> = await browser.pages();
+      const pageProcesses: Array<IPageProcesses> = [
+        {
+          page: initialPages[0],
+          naverId: null,
+          status: null,
+          cronId: null
+        }
+      ];
 
-        setMainPuppeteer({
-          ...mainPuppeteer,
-          browser,
-          pageProcesses
-        });
-      }
+      setMainPuppeteer({
+        ...mainPuppeteer,
+        browser,
+        pageProcesses
+      });
 
       // 외부의 main process 에서 오는 종료를 감지해서 크로미니엄 브라우저를 종료시킨다.
       ipcRenderer.on('quit', async (event: string) => {
@@ -135,7 +133,7 @@ const RootContextProvider = (props: any) => {
           const pages = await mainPuppeteer.browser.pages();
           const promiseArr = [];
           for (let i = 0; i < pages.length; i++) {
-            const page = pages[i]
+            const page = pages[i];
             promiseArr.push(page.close());
           }
           await Promise.all(promiseArr);
@@ -167,7 +165,7 @@ const RootContextProvider = (props: any) => {
     workings,
     setWorkings,
     logs,
-    setLogs,
+    setLogs
   };
 
   return <RootContext.Provider value={value}>{props.children}</RootContext.Provider>;

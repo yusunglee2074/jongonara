@@ -3,8 +3,8 @@ import { AppContainer } from 'react-hot-loader';
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 import 'antd/dist/antd.css';
-import { RootContextProvider } from './context/appContext';
-import AppRouter from './appRouter';
+import { RootContextProvider } from './context/AppContext';
+import AppRouter from './AppRouter';
 
 // Create main element
 const mainElement = document.createElement('div');
@@ -27,7 +27,7 @@ render(AppRouter);
 // Hot Module Replacement API
 if (typeof module.hot !== 'undefined') {
   module.hot.accept('./appRouter', () => {
-    import('./appRouter').then(World => {
+    import('./AppRouter').then(World => {
       render(World.default);
     });
   });

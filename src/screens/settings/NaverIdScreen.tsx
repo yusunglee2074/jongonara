@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { useContext, useEffect } from 'react';
 import styled from 'styled-components';
-import { RootContext } from '../../context/appContext';
+import { RootContext } from '../../context/AppContext';
 
 const S = {
   ContainerDiv: styled.div`
