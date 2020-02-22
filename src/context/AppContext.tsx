@@ -38,13 +38,13 @@ interface IContextDefaultValue {
   setLogs: Function;
 }
 
-interface INaverId {
+export interface INaverId {
   id: number;
   naverId: string;
   connection: boolean;
 }
 
-interface INaverCafe {
+export interface INaverCafe {
   id: number;
   naverId: INaverId['id'];
   cafeId: string;
@@ -53,14 +53,14 @@ interface INaverCafe {
   cafeBoardName: string;
 }
 
-interface ITemplate {
+export interface ITemplate {
   id: number;
   type: string;
   title: string;
   text: string;
 }
 
-interface IWorking {
+export interface IWorking {
   id: number;
   type: string;
   title: string;
@@ -70,7 +70,7 @@ interface IWorking {
   templateId: ITemplate['id'];
 }
 
-interface ILog {
+export interface ILog {
   createdAt: string;
   title: string;
   text: string;

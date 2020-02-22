@@ -5,11 +5,11 @@ import styled from 'styled-components';
 import {
   HOME_SCREEN_CAFE_TABLE_COL,
   HOME_SCREEN_LOG_TABLE_COL,
-  HOME_SCREEN_NAVER_ID_TABLE_COL,
   HOME_SCREEN_TEMPLATE_TABLE_COL,
   HOME_SCREEN_WORKING_TABLE_COL
 } from '../constants';
 import Step from '../components/Step'
+import NaverIdTable from '../components/NaverIdTable'
 
 const { Header, Content } = Layout;
 
@@ -54,19 +54,8 @@ const HomeScreen: React.FunctionComponent = () => {
       <Content style={{ margin: '8px 8px' }}>
         <Row type="flex" justify="space-between">
           <S.TableCol span={5}>
-            <Table
-              columns={HOME_SCREEN_NAVER_ID_TABLE_COL}
-              dataSource={[]}
-              scroll={{
-                x: true,
-                y: true
-              }}
-              bordered={true}
-              size={'small'}
+            <NaverIdTable
               title={() => <Step text="네이버 ID" goto={'/setting-naver-id'} />}
-              locale={{
-                emptyText: '최소 하나의 데이터를 넣어주세요.'
-              }}
             />
           </S.TableCol>
           <S.TableCol span={9}>
