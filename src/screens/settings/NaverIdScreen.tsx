@@ -28,7 +28,6 @@ const NaverIdScreen: React.FunctionComponent = () => {
   return (
     <S.ContainerDiv>
       <S.ContainerTitleP>네이버 아이디 추가/제거</S.ContainerTitleP>
-      <p>아이디를 1개 이상 추가해주세요.</p>
     </S.ContainerDiv>
   );
 };

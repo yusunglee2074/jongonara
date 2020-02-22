@@ -2,12 +2,12 @@ import * as React from 'react';
 import { useState } from 'react';
 import { Layout, Menu, Icon } from 'antd';
 import { Link, Route, RouteComponentProps, Switch, withRouter } from 'react-router-dom';
-import NaverIdScreen from './settings/naverId'
-import NaverCafeAndBoardScreen from './settings/naverCafeAndBoard'
-import TemplateScreen from './settings/template'
-import WorkingScreen from './settings/working'
-import ContactScreen from './contact/contact'
-import ProfileScreen from './profile/profile'
+import NaverIdScreen from './settings/NaverIdScreen'
+import NaverCafeAndBoardScreen from './settings/NaverCafeAndBoardScreen'
+import TemplateScreen from './settings/TemplateScreen'
+import WorkingScreen from './settings/WorkingScreen'
+import ContactScreen from './contact/ContactScreen'
+import ProfileScreen from './profile/ProfileScreen'
 import HomeScreen from './home'
 
 const { Sider } = Layout;
