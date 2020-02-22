@@ -2,19 +2,12 @@ import * as React from 'react';
 import { ReactNode, useEffect, useState } from 'react';
 import { remote, ipcRenderer } from 'electron';
 import { Page, Browser } from 'puppeteer';
-import { PUPPETEER_BROWSER_OPTIONS_ARGS } from './constants';
+import { PUPPETEER_BROWSER_OPTIONS_ARGS } from '../constants';
 
 const puppeteer = remote.require('puppeteer');
 
 interface IProps {
   children: ReactNode;
-}
-
-interface Log {
-  createdAt: string;
-  type: string;
-  naverId: string;
-  text: string;
 }
 
 interface IPageProcesses {
@@ -27,7 +20,6 @@ interface IPageProcesses {
 interface IMainPuppeteer {
   browser: Browser;
   pageProcesses: Array<IPageProcesses>;
-  logs: Array<Log>;
   cron: string;
 }
 
@@ -38,18 +30,55 @@ interface IContextDefaultValue {
   setContextUser: Function;
   mainPuppeteer: IMainPuppeteer;
   setMainPuppeteer: Function;
+  naverIds: Array<INaverId>;
+  setNaverIds: Function;
+  naverCafes: Array<INaverCafe>;
+  setNaverCafes: Function;
+  templates: Array<ITemplate>;
+  setTemplates: Function;
+  workings: Array<IWorking>;
+  setWorkings: Function;
+  logs: Array<ILog>;
+  setLogs: Function;
 }
 
-interface INaverIds {
+interface INaverId {
+  id: number;
   naverId: string;
+  connection: boolean;
 }
 
 interface INaverCafe {
-  naverId: string;
+  id: number;
+  naverId: INaverId['id'];
   cafeId: string;
   cafeName: string;
   cafeBoardId: string;
   cafeBoardName: string;
+}
+
+interface ITemplate {
+  id: number;
+  type: string;
+  title: string;
+  text: string;
+}
+
+interface IWorking {
+  id: number;
+  type: string;
+  title: string;
+  text: string;
+  naverId: INaverId['id'];
+  naverCafeId: INaverCafe['id'];
+  templateId: ITemplate['id'];
+}
+
+interface ILog {
+  createdAt: string;
+  title: string;
+  text: string;
+  workingId: IWorking['id'];
 }
 
 const RootContext = React.createContext({} as IContextDefaultValue);
@@ -58,6 +87,11 @@ const RootContextProvider = ({ children }: IProps) => {
   const [authenticated, setAuthenticated] = useState(false);
   const [contextUser, setContextUser] = useState({});
   const [mainPuppeteer, setMainPuppeteer] = useState({} as IMainPuppeteer);
+  const [naverIds, setNaverIds] = useState([] as Array<INaverId>);
+  const [naverCafes, setNaverCafes] = useState([] as Array<INaverCafe>);
+  const [templates, setTemplates] = useState([] as Array<ITemplate>);
+  const [workings, setWorkings] = useState([] as Array<IWorking>);
+  const [logs, setLogs] = useState([] as Array<ILog>);
 
   useEffect(() => {
     // 애플리케이션 시작시, 기타 초기화 루틴도 적용 예정, 시작시 단 한번만 실행
@@ -120,7 +154,17 @@ const RootContextProvider = ({ children }: IProps) => {
     contextUser,
     setContextUser,
     mainPuppeteer,
-    setMainPuppeteer
+    setMainPuppeteer,
+    naverIds,
+    setNaverIds,
+    naverCafes,
+    setNaverCafes,
+    templates,
+    setTemplates,
+    workings,
+    setWorkings,
+    logs,
+    setLogs,
   };
 
   return <RootContext.Provider value={value}>{children}</RootContext.Provider>;

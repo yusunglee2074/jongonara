@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { BrowserRouter, Route, Switch, Redirect } from 'react-router-dom';
 import { useContext } from 'react';
-import { RootContext } from './appContext';
+import { RootContext } from './context/appContext';
 import LoginScreen from './screens/welcome/login'
 import AppLayout from './screens/appLayout'
 import RegistrationScreen from './screens/welcome/registration'
