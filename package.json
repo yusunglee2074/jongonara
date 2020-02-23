@@ -133,6 +133,7 @@
     "react": "^16.8.0-alpha.0",
     "react-dom": "^16.8.6",
     "react-router-dom": "^5.1.2",
+    "sqlite3": "^4.1.1",
     "styled-components": "^5.0.1"
   }
 }
