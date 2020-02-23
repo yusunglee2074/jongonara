@@ -83,6 +83,7 @@
   "homepage": "https://github.com/snnsnn/electron-react-typescript",
   "devDependencies": {
     "@types/antd": "^1.0.0",
+    "@types/electron": "^1.6.10",
     "@types/electron-devtools-installer": "^2.2.0",
     "@types/jest": "^23.3.12",
     "@types/puppeteer": "^2.0.0",
