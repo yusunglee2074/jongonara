@@ -22,7 +22,7 @@ interface IMainPuppeteer {
 interface IContextDefaultValue {
   authenticated: boolean;
   setAuthenticated: Function;
-  contextUser: object;
+  contextUser: { msg: string; err: object };
   setContextUser: Function;
   mainPuppeteer: IMainPuppeteer;
   setMainPuppeteer: Function;
@@ -81,7 +81,7 @@ const RootContext = React.createContext({} as IContextDefaultValue);
 
 const RootContextProvider = (props: any) => {
   const [authenticated, setAuthenticated] = useState(false);
-  const [contextUser, setContextUser] = useState({});
+  const [contextUser, setContextUser] = useState({err: {}, msg: '없음'});
   const [mainPuppeteer, setMainPuppeteer] = useState({} as IMainPuppeteer);
   const [naverIds, setNaverIds] = useState([] as Array<INaverId>);
   const [naverCafes, setNaverCafes] = useState([] as Array<INaverCafe>);
@@ -93,22 +93,32 @@ const RootContextProvider = (props: any) => {
     // 애플리케이션 시작시, 기타 초기화 루틴도 적용 예정, 시작시 단 한번만 실행
     const initBrowser = async () => {
       const getChromiumExecPath = () => {
-        const text = puppeteer
-          .executablePath()
-          .replace('app.asar', 'app.asar.unpacked/node_modules/puppeteer');
-        return text.replace('/dist', '/node_modules/puppeteer');
+        if (remote.getGlobal('process').env === 'production') {
+          return puppeteer
+            .executablePath()
+            .replace('app.asar', 'app.asar.unpacked');
+        } else {
+          const text = puppeteer
+            .executablePath()
+            .replace('app.asar', 'app.asar.unpacked/node_modules/puppeteer');
+          return text.replace('/dist', '/node_modules/puppeteer');
+        }
       };
       const options = {
         args: PUPPETEER_BROWSER_OPTIONS_ARGS,
-        headless: true,
         ignoreHTTPSErrors: true,
-        userDataDir: './tmp'
+        userDataDir: './tmp',
+        headless: false,
       };
-      const browser = await puppeteer.launch({
-        ...options,
-        executablePath: getChromiumExecPath(),
-        headless: false
-      });
+      let browser
+      try {
+        browser = await puppeteer.launch({
+          ...options,
+          executablePath: getChromiumExecPath(),
+        });
+      } catch (e) {
+        setContextUser({ msg: '에러났음', err: e.message })
+      }
 
       const initialPages: Array<Page> = await browser.pages();
       const pageProcesses: Array<IPageProcesses> = [
