@@ -92,8 +92,12 @@ const RootContextProvider = (props: any) => {
   useEffect(() => {
     // 애플리케이션 시작시, 기타 초기화 루틴도 적용 예정, 시작시 단 한번만 실행
     const initBrowser = async () => {
+      const env = remote.getGlobal('process').env['NODE_ENV'];
+      console.log(remote.getGlobal('process').env);
+      setContextUser({ ...contextUser, msg: env});
+
       const getChromiumExecPath = () => {
-        if (remote.getGlobal('process').env === 'production') {
+        if (env !== 'development') {
           return puppeteer
             .executablePath()
             .replace('app.asar', 'app.asar.unpacked');
@@ -104,6 +108,7 @@ const RootContextProvider = (props: any) => {
           return text.replace('/dist', '/node_modules/puppeteer');
         }
       };
+
       const options = {
         args: PUPPETEER_BROWSER_OPTIONS_ARGS,
         ignoreHTTPSErrors: true,
@@ -117,7 +122,7 @@ const RootContextProvider = (props: any) => {
           executablePath: getChromiumExecPath(),
         });
       } catch (e) {
-        setContextUser({ msg: '에러났음', err: e.message })
+        setContextUser({ ...contextUser, err: e.message })
       }
 
       const initialPages: Array<Page> = await browser.pages();
