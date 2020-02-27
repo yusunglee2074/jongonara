@@ -7,7 +7,7 @@ import {
   HOME_SCREEN_LOG_TABLE_COL,
   HOME_SCREEN_TEMPLATE_TABLE_COL,
   HOME_SCREEN_WORKING_TABLE_COL
-} from '../constants';
+} from '../utils/constants';
 import Step from '../components/Step'
 import NaverIdTable from '../components/NaverIdTable'
 

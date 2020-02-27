@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { Table } from 'antd';
-import { HOME_SCREEN_NAVER_ID_TABLE_COL } from '../constants';
+import { HOME_SCREEN_NAVER_ID_TABLE_COL } from '../utils/constants';
 import { ReactNode } from 'react';
 import { INaverId } from '../context/AppContext';
 

@@ -51,7 +51,7 @@ const NaverIdScreen: React.FunctionComponent = () => {
       <S.ContainerTitleP>네이버 아이디 추가/제거</S.ContainerTitleP>
       <span>{contextUser.msg}</span>
       <span>{contextUser.err.toString()}</span>
-      <span onClick={() => getData()}>여기 클릭 테스트</span>
+      <span onClick={() => getData()}>기 클릭 테스트</span>
       <span>{temp}</span>
       <Form layout={'inline'} onSubmit={onSubmit}>
         <Input

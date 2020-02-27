@@ -1,10 +1,7 @@
 import * as React from 'react';
 import { useEffect, useState } from 'react';
-import { remote, ipcRenderer } from 'electron';
 import { Page, Browser } from 'puppeteer';
-import { PUPPETEER_BROWSER_OPTIONS_ARGS } from '../constants';
-
-const puppeteer = remote.require('puppeteer');
+import { launchBrowser } from '../ipc/renderer-IPC'
 
 interface IPageProcesses {
   page: Page;
@@ -92,69 +89,8 @@ const RootContextProvider = (props: any) => {
   useEffect(() => {
     // 애플리케이션 시작시, 기타 초기화 루틴도 적용 예정, 시작시 단 한번만 실행
     const initBrowser = async () => {
-      const env = remote.getGlobal('process').env['NODE_ENV'];
-      console.log(remote.getGlobal('process').env);
-      setContextUser({ ...contextUser, msg: env});
-
-      const getChromiumExecPath = () => {
-        if (env !== 'development') {
-          return puppeteer
-            .executablePath()
-            .replace('app.asar', 'app.asar.unpacked');
-        } else {
-          const text = puppeteer
-            .executablePath()
-            .replace('app.asar', 'app.asar.unpacked/node_modules/puppeteer');
-          return text.replace('/dist', '/node_modules/puppeteer');
-        }
-      };
-
-      const options = {
-        args: PUPPETEER_BROWSER_OPTIONS_ARGS,
-        ignoreHTTPSErrors: true,
-        userDataDir: './tmp',
-        headless: false,
-      };
-      let browser
-      try {
-        browser = await puppeteer.launch({
-          ...options,
-          executablePath: getChromiumExecPath(),
-        });
-      } catch (e) {
-        setContextUser({ ...contextUser, err: e.message })
-      }
-
-      const initialPages: Array<Page> = await browser.pages();
-      const pageProcesses: Array<IPageProcesses> = [
-        {
-          page: initialPages[0],
-          naverId: null,
-          status: null,
-          cronId: null
-        }
-      ];
-
-      setMainPuppeteer({
-        ...mainPuppeteer,
-        browser,
-        pageProcesses
-      });
-
-      // 외부의 main process 에서 오는 종료를 감지해서 크로미니엄 브라우저를 종료시킨다.
-      ipcRenderer.on('quit', async (event: string) => {
-        console.log(event);
-        if (event === 'quit') {
-          const pages = await mainPuppeteer.browser.pages();
-          const promiseArr = [];
-          for (let i = 0; i < pages.length; i++) {
-            const page = pages[i];
-            promiseArr.push(page.close());
-          }
-          await Promise.all(promiseArr);
-          await mainPuppeteer.browser.close();
-        }
-      });
+      const result = launchBrowser();
+      console.log(result);
     };
 
     const initDB = async () => {

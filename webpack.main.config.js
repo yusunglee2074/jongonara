@@ -10,12 +10,18 @@ module.exports = merge.smart(baseConfig, {
     entry: {
         main: './src/main.ts'
     },
+    externals: {
+        'bufferutil': 'commonjs bufferutil',
+        'utf-8-validate': 'commonjs utf-8-validate',
+    },
     module: {
         rules: [
             {
                 test: /\.tsx?$/,
                 include: [
-                    path.resolve(__dirname, 'src', 'main.ts')
+                    path.resolve(__dirname, 'src', 'utils'),
+                    path.resolve(__dirname, 'src', 'main.ts'),
+                    path.resolve(__dirname, 'src', 'ipc'),
                 ],
                 loader: 'awesome-typescript-loader'
             }
