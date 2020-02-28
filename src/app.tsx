@@ -26,7 +26,7 @@ render(AppRouter);
 
 // Hot Module Replacement API
 if (typeof module.hot !== 'undefined') {
-  module.hot.accept('./appRouter', () => {
+  module.hot.accept('./router/AppRouter', () => {
     import('./router/AppRouter').then(World => {
       render(World.default);
     });
