@@ -7,17 +7,22 @@ const env = process.env.NODE_ENV;
 
 let pages: any = {};
 
+const isWin = process.platform === "win32";
+
 const mainIPC = async () => {
   const getChromiumExecutePath = () => {
     if (env !== 'development') {
-      return puppeteer
-        .executablePath()
-        .replace('app.asar', 'app.asar.unpacked')
-        .replace('dist', '')
-        //for mac
-        .replace('//', '/')
-        //for window
-        .replace('\\\\', '\\');
+      if (isWin) {
+        return puppeteer
+          .executablePath()
+          .replace('app.asar', 'app.asar.unpacked')
+          .replace('dist', 'node_modules\\puppeteer')
+      } else {
+        return puppeteer
+          .executablePath()
+          .replace('app.asar', 'app.asar.unpacked')
+          .replace('dist', 'node_modules/puppeteer')
+      }
     } else {
       const text = puppeteer
         .executablePath()
