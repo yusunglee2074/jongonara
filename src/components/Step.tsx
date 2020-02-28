@@ -21,7 +21,8 @@ const S = {
 const Step: React.FunctionComponent<{
   text: string;
   goto: string;
-}> = ({ text, goto }) => {
+  login?: Function;
+}> = ({ text, goto, login }) => {
   return (
     <S.StepDiv>
       <Row type="flex" style={{ alignItems: 'center' }}>
@@ -29,6 +30,7 @@ const Step: React.FunctionComponent<{
         <S.StepLink to={goto}>
           <Button icon="setting" />
         </S.StepLink>
+        {login && <Button onClick={() => login()}>로그인</Button>}
       </Row>
     </S.StepDiv>
   );

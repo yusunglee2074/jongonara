@@ -1,5 +1,6 @@
-import { ipcRenderer } from "electron"
+import { INaverId } from '../store/Store'
+import { ipcRenderer } from 'electron';
 
-export const launchBrowser = () => {
-  return ipcRenderer.sendSync('initBrowser');
-}
+export const loginNaver = async (naverIds: Array<INaverId>) => {
+  return await ipcRenderer.invoke('loginNaver', naverIds);
+};

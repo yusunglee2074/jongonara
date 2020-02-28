@@ -2,9 +2,10 @@ import * as React from 'react';
 import { useContext, useEffect, useState } from 'react'
 import styled from 'styled-components';
 import { Button, Form, Icon, Input } from 'antd';
-import { RootContext } from '../../context/AppContext';
 import NaverIdTable from '../../components/NaverIdTable';
 import { FormEvent } from 'react'
+import { RootContext } from '../../context/AppContext'
+import { setNaverIdsOnDB } from '../../store/Store'
 
 const S = {
   ContainerDiv: styled.div`
@@ -17,42 +18,39 @@ const S = {
 };
 
 const NaverIdScreen: React.FunctionComponent = () => {
-  const { mainPuppeteer,contextUser, naverIds, setNaverIds } = useContext(RootContext);
   const [naverId, setNaverId] = useState('');
   const [pwd, setPwd] = useState('');
-  const [temp, setTemp] = useState('')
+  const { naverIds, setNaverIds } = useContext(RootContext);
 
   useEffect(() => {
     (async () => {
-      console.log(mainPuppeteer);
-      console.log(naverIds, '네이버아이디');
-      console.log(setNaverIds);
     })();
   }, []);
 
-  const onSubmit = (e: FormEvent) => {
+  const onSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    // 퍼피티어 페이지 만들고 로그인 하고 mainPup 상태 업데이트
-    setNaverIds([...naverIds, { key: 1231, id: 1231, naverId: naverId, connection: '접속'}])
+    const prevNaverIds = [...naverIds];
+    const newNaverIds = [...naverIds, { id: naverId, password: pwd }]
+    try {
+      await setNaverIds(newNaverIds);
+      await setNaverIdsOnDB(newNaverIds);
+    } catch (e) {
+      console.log(e);
+      await setNaverIds(prevNaverIds);
+      await setNaverIdsOnDB(prevNaverIds);
+    }
   };
 
-  const getData = async () => {
-    const page = mainPuppeteer.pageProcesses[0].page;
-    await page.goto('https://www.naver.com');
-
-
-
-    setTemp(page.url());
-
+  const deleteNaverId = async (e: any, text: any, record: any, index: any) => {
+    e.preventDefault();
+    console.log(text)
+    console.log(record)
+    console.log(index)
   }
 
   return (
     <S.ContainerDiv>
       <S.ContainerTitleP>네이버 아이디 추가/제거</S.ContainerTitleP>
-      <span>{contextUser.msg}</span>
-      <span>{contextUser.err.toString()}</span>
-      <span onClick={() => getData()}>기 클릭 테스트</span>
-      <span>{temp}</span>
       <Form layout={'inline'} onSubmit={onSubmit}>
         <Input
           prefix={<Icon type="user" style={{ color: 'rgba(0,0,0,.25)' }} />}
@@ -78,7 +76,7 @@ const NaverIdScreen: React.FunctionComponent = () => {
             title: '삭제',
             dataIndex: 'delete',
             key: 'delete',
-            render: () => <Button>삭제</Button>
+            render: (text:any, record:any, index: any) => <Button onClick={e => deleteNaverId(e, text, record, index)}>삭제</Button>
           }
         ]}
       />

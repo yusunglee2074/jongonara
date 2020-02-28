@@ -3,19 +3,17 @@ import { useState } from 'react';
 import { Layout, Menu, Icon } from 'antd';
 import { Link, Route, RouteComponentProps, Switch, withRouter } from 'react-router-dom';
 import NaverIdScreen from '../screens/settings/NaverIdScreen'
-import NaverCafeAndBoardScreen from '../screens/settings/NaverCafeAndBoardScreen'
 import TemplateScreen from '../screens/settings/TemplateScreen'
 import WorkingScreen from '../screens/settings/WorkingScreen'
 import ContactScreen from '../screens/contact/ContactScreen'
 import ProfileScreen from '../screens/profile/ProfileScreen'
-import HomeScreen from '../screens/home'
+import HomeScreen from '../screens/Home'
 
 const { Sider } = Layout;
 
 const sideMenuArr = [
   { text: '메인 대시보드', iconType: 'home', goto: '/' },
   { text: '네이버 아이디 설정', iconType: 'user', goto: '/setting-naver-id' },
-  { text: '카페, 게시판 설정', iconType: 'filter', goto: '/setting-naver-cafe' },
   { text: '작성 글 템플릿 설정', iconType: 'file-text', goto: '/setting-template' },
   { text: '작업 설정', iconType: 'play-circle', goto: '/setting-working' },
   { text: '결제/연장', iconType: 'setting', goto: '/profile' },
@@ -47,7 +45,6 @@ const AppLayout: React.FunctionComponent<RouteComponentProps> = ({ location }) =
       <Layout>
         <Switch>
           <Route path="/setting-naver-id" component={NaverIdScreen} />
-          <Route path="/setting-naver-cafe" component={NaverCafeAndBoardScreen} />
           <Route path="/setting-template" component={TemplateScreen} />
           <Route path="/setting-working" component={WorkingScreen} />
           <Route path="/contact" component={ContactScreen} />
