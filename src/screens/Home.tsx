@@ -12,6 +12,7 @@ import NaverIdTable from '../components/NaverIdTable';
 import { useContext, useEffect, useState } from 'react';
 import { RootContext } from '../context/AppContext';
 import { loginNaver } from '../ipc/renderer-IPC';
+import { setNaverIdsOnDB } from '../store/Store'
 
 const { Header, Content } = Layout;
 
@@ -34,9 +35,8 @@ const S = {
 };
 
 const HomeScreen: React.FunctionComponent = () => {
-  const { naverIds, templates, workings, logs } = useContext(RootContext);
+  const { naverIds, setNaverIds, templates, workings, logs } = useContext(RootContext);
   const [loading, setLoading] = useState(true);
-  const [temp, setTemp] = useState('처음');
 
   useEffect(() => {
     setLoading(false);
@@ -45,14 +45,33 @@ const HomeScreen: React.FunctionComponent = () => {
   const login = async () => {
     setLoading(true);
     try {
-      const result = await loginNaver([{ id: 'lys20741', password: 'dldbtjd12'}]);
-      setTemp(result);
+      const result = await loginNaver(naverIds);
+      // 실패한 아이디가 있을 경우
+      console.log(result);
+      if (result.length) {
+        //TODO: alert
+        console.log(
+          '잘못된 아이디/패스워드입니다. ' +
+          '직접 크롬이나 익스프로러 브라우저로 로그인을 진행 후 입력할 것을 권장드립니다. ' +
+          '계속 다른 패스워드로 시도될 경우 아이피가 일정기간 막힐 가능성이 있습니다.'
+        );
+        const tempNaverIds = naverIds;
+        for (let i = 0; i < result.length; i++) {
+          const failNaverId = result[i];
+          tempNaverIds.map(el => ({ ...el, connection: el.id === failNaverId ? '로그인 실패' : '로그인 성공'}))
+        }
+        await setNaverIdsOnDB(tempNaverIds);
+        setNaverIds(tempNaverIds);
+      } else {
+        const tempNaverIds = naverIds.map(el => ({ ...el, connection: '로그인 성공'}));
+        setNaverIds(tempNaverIds)
+        await setNaverIdsOnDB(tempNaverIds)
+      }
     } catch (e) {
       console.log(e);
     }
     setLoading(false);
   };
-
 
   return (
     <>
@@ -76,15 +95,15 @@ const HomeScreen: React.FunctionComponent = () => {
         </Header>
         <Content style={{ margin: '8px 8px' }}>
           <Row type="flex" justify="space-between">
-            <h2>{temp}</h2>
             <S.TableCol span={8}>
               <NaverIdTable
                 dataSource={naverIds}
-                title={() => (<Step text="네이버 ID" goto={'/setting-naver-id'} login={login} />)}
+                title={() => <Step text="네이버 ID" goto={'/setting-naver-id'} login={login} />}
               />
             </S.TableCol>
             <S.TableCol span={15}>
               <Table
+                rowKey={'naverId'}
                 columns={HOME_SCREEN_TEMPLATE_TABLE_COL}
                 dataSource={templates}
                 bordered={true}
@@ -102,6 +121,7 @@ const HomeScreen: React.FunctionComponent = () => {
           </Row>
           <S.TableCol>
             <Table
+              rowKey={'naverId'}
               columns={HOME_SCREEN_WORKING_TABLE_COL}
               dataSource={workings}
               bordered={true}
@@ -118,6 +138,7 @@ const HomeScreen: React.FunctionComponent = () => {
           </S.TableCol>
           <S.TableCol>
             <Table
+              rowKey={'naverId'}
               columns={HOME_SCREEN_LOG_TABLE_COL}
               dataSource={logs}
               bordered={true}

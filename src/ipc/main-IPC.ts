@@ -7,7 +7,7 @@ const env = process.env.NODE_ENV;
 
 let pages: any = {};
 
-const isWin = process.platform === "win32";
+const isWin = process.platform === 'win32';
 
 const mainIPC = async () => {
   const getChromiumExecutePath = () => {
@@ -16,12 +16,12 @@ const mainIPC = async () => {
         return puppeteer
           .executablePath()
           .replace('app.asar', 'app.asar.unpacked')
-          .replace('dist', 'node_modules\\puppeteer')
+          .replace('dist', 'node_modules\\puppeteer');
       } else {
         return puppeteer
           .executablePath()
           .replace('app.asar', 'app.asar.unpacked')
-          .replace('dist', 'node_modules/puppeteer')
+          .replace('dist', 'node_modules/puppeteer');
       }
     } else {
       const text = puppeteer
@@ -37,8 +37,7 @@ const mainIPC = async () => {
     headless: false
   };
 
-  ipcMain.handle('loginNaver', async (e: any, naverIds: Array<INaverId>) => {
-    console.log(e);
+  ipcMain.handle('loginNaver', async (_e: any, naverIds: Array<INaverId>): Promise<any> => {
     const createPage = async (naverId: string, password: string) => {
       try {
         const browser = await puppeteer.launch({
@@ -68,8 +67,11 @@ const mainIPC = async () => {
         );
         await page.waitFor(200);
         await page.click('input[id="log.login"]');
+        await page.waitForNavigation();
 
-        return { id: naverId, page, browser };
+        const isLoggedIn = page.url().indexOf('www.naver.com') > -1;
+
+        return { id: naverId, page, browser, isLoggedIn };
       } catch (err) {
         console.log(err);
         console.log(err.message);
@@ -79,6 +81,17 @@ const mainIPC = async () => {
     };
 
     const promiseArr = [];
+
+    for (let i = 0; i < Object.keys(pages).length; i++) {
+      const key = Object.keys(pages)[i];
+      const browser = pages[key].browser;
+      promiseArr.push(browser.close());
+    }
+
+    await Promise.all(promiseArr);
+    promiseArr.length = 0;
+    pages = {};
+
     for (let i = 0; i < naverIds.length; i++) {
       const { id, password } = naverIds[i];
       if (!pages[id]) promiseArr.push(createPage(id, password));
@@ -87,12 +100,18 @@ const mainIPC = async () => {
 
     try {
       const result = await Promise.all(promiseArr);
-      result.map(({ id, page, browser }) => {
-        pages = { ...pages, [id]: { page, browser } };
+      const loginFailIds: Array<any> = [];
+      result.map(({ id, page, browser, isLoggedIn }) => {
+        if (!isLoggedIn) {
+          loginFailIds.push(id)
+          browser.close();
+        } else {
+          pages = { ...pages, [id]: { page, browser } };
+        }
       });
-      return '성공';
+      return loginFailIds;
     } catch (err) {
-      return err.message;
+      throw Error(err);
     }
   });
 };

@@ -1,6 +1,7 @@
 'use strict';
 
 const path = require('path');
+const CopyWebpackPlugin = require('copy-webpack-plugin');
 
 module.exports = {
     output: {
@@ -16,5 +17,6 @@ module.exports = {
     },
     devtool: 'source-map',
     plugins: [
+        new CopyWebpackPlugin([ { from: 'src/public', to: 'public' }, ]),
     ]
 };

@@ -5,7 +5,7 @@ const store = new Store();
 export interface INaverId {
   id: string;
   password: string;
-  connection?: boolean;
+  connection?: string;
 }
 
 export interface INaverCafe {
@@ -18,6 +18,10 @@ export interface INaverCafe {
 
 export interface ITemplate {
   type: string;
+  price?: number;
+  exposePhoneNumber?: boolean;
+  useTempPhoneNumber?: boolean;
+  tags?: string;
   title: string;
   text: string;
 }
@@ -58,7 +62,7 @@ export const setNaverIdsOnDB = async (naverIds: Array<INaverId>): Promise<Array<
 };
 export const getTemplatesOnDB = async (): Promise<Array<ITemplate>> => {
   try {
-    const templates = await store.get('naverIds');
+    const templates = await store.get('templates');
     if (!templates) return [];
     return templates;
   } catch (e) {

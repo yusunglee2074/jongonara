@@ -14,6 +14,7 @@ const NaverIdTable: React.FC<IProps> = ({ title, extraCols = [], dataSource = []
   return (
     <Table
       pagination={false}
+      rowKey={'id'}
       columns={[...HOME_SCREEN_NAVER_ID_TABLE_COL, ...extraCols]}
       dataSource={dataSource}
       scroll={{

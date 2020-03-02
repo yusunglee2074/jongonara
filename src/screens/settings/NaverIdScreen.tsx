@@ -30,22 +30,35 @@ const NaverIdScreen: React.FunctionComponent = () => {
   const onSubmit = async (e: FormEvent) => {
     e.preventDefault();
     const prevNaverIds = [...naverIds];
-    const newNaverIds = [...naverIds, { id: naverId, password: pwd }]
-    try {
-      await setNaverIds(newNaverIds);
-      await setNaverIdsOnDB(newNaverIds);
-    } catch (e) {
-      console.log(e);
-      await setNaverIds(prevNaverIds);
-      await setNaverIdsOnDB(prevNaverIds);
+    const found = prevNaverIds.find(el => el.id === naverId)
+    if (found) {
+      console.log('이미 추가되어있는 아이디입니다.')
+    } else {
+      const newNaverIds = [...naverIds, { id: naverId, password: pwd, connection: '로그인을 시도해주세요.' }]
+      try {
+        await setNaverIds(newNaverIds);
+        await setNaverIdsOnDB(newNaverIds);
+      } catch (e) {
+        console.log(e);
+        await setNaverIds(prevNaverIds);
+        await setNaverIdsOnDB(prevNaverIds);
+      }
     }
   };
 
-  const deleteNaverId = async (e: any, text: any, record: any, index: any) => {
+  const deleteNaverId = async (e: any, ...args: Array<any>) => {
     e.preventDefault();
-    console.log(text)
-    console.log(record)
-    console.log(index)
+    const [,record] = args;
+    const { id } = record;
+      try {
+        const newNaverIds = naverIds.filter(el => el.id !== id)
+        await setNaverIds(newNaverIds);
+        await setNaverIdsOnDB(newNaverIds);
+      } catch (e) {
+        console.log(e);
+        await setNaverIds(naverIds);
+        await setNaverIdsOnDB(naverIds);
+      }
   }
 
   return (

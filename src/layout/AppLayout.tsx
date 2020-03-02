@@ -3,11 +3,12 @@ import { useState } from 'react';
 import { Layout, Menu, Icon } from 'antd';
 import { Link, Route, RouteComponentProps, Switch, withRouter } from 'react-router-dom';
 import NaverIdScreen from '../screens/settings/NaverIdScreen'
-import TemplateScreen from '../screens/settings/TemplateScreen'
+import TemplateScreen from '../screens/settings/templates/TemplateScreen'
 import WorkingScreen from '../screens/settings/WorkingScreen'
 import ContactScreen from '../screens/contact/ContactScreen'
 import ProfileScreen from '../screens/profile/ProfileScreen'
 import HomeScreen from '../screens/Home'
+import TradeTemplateWriteScreen from '../screens/settings/templates/TradeTemplateWriteScreen'
 
 const { Sider } = Layout;
 
@@ -45,6 +46,7 @@ const AppLayout: React.FunctionComponent<RouteComponentProps> = ({ location }) =
       <Layout>
         <Switch>
           <Route path="/setting-naver-id" component={NaverIdScreen} />
+          <Route path="/setting-template-write" component={TradeTemplateWriteScreen} />
           <Route path="/setting-template" component={TemplateScreen} />
           <Route path="/setting-working" component={WorkingScreen} />
           <Route path="/contact" component={ContactScreen} />

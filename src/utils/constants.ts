@@ -1,13 +1,13 @@
 export const HOME_SCREEN_NAVER_ID_TABLE_COL: Array<object> = [
   {
     title: '아이디',
-    dataIndex: 'naverId',
-    key: 'naverId'
+    dataIndex: 'id',
+    key: 'id'
   },
   {
     title: '접속 상태',
     dataIndex: 'connection',
-    key: 'connection'
+    key: 'connection',
   }
 ];
 

@@ -2,9 +2,10 @@ import 'react-hot-loader';
 import { AppContainer } from 'react-hot-loader';
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
-import 'antd/dist/antd.css';
 import { RootContextProvider } from './context/AppContext';
 import AppRouter from './router/AppRouter';
+
+import 'antd/dist/antd.css';
 
 // Create main element
 const mainElement = document.createElement('div');
