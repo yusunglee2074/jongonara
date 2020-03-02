@@ -1,13 +1,17 @@
 import * as React from 'react';
+import { remote } from 'electron';
 import { Button, Row, Col, Input, Checkbox, InputNumber } from 'antd';
 import styled from 'styled-components';
-import { useContext, useEffect } from 'react'
+import { useContext, useEffect } from 'react';
 import { useState } from 'react';
-import { ITemplate, setTemplatesOnDB } from '../../../store/Store'
-import { RootContext } from '../../../context/AppContext'
+import { ITemplate, setTemplatesOnDB } from '../../../store/Store';
+import { RootContext } from '../../../context/AppContext';
+import * as path from 'path';
+
 
 // @ts-ignore
 const postscribe = require('postscribe');
+const appPath = remote.app.getAppPath();
 
 const S = {
   ContainerDiv: styled.div`
@@ -33,12 +37,29 @@ const TradeTemplateWriteScreen: React.FunctionComponent = () => {
     title: '',
     text: ''
   } as ITemplate);
-  const {templates, setTemplates} = useContext(RootContext);
+  const { templates, setTemplates } = useContext(RootContext);
 
   useEffect(() => {
+    const HuskyEZCreator = path.resolve(
+      // @ts-ignore
+      remote.process['NODE_ENV'] === 'production' ? appPath: '/',
+      'public',
+      'NSE2',
+      'js',
+      'service',
+      'HuskyEZCreator.js'
+    );
+    console.log(HuskyEZCreator);
+    const SkinUrl = path.resolve(
+      // @ts-ignore
+      remote.process['NODE_ENV'] === 'production' ? appPath: '/',
+      'public',
+      'NSE2',
+      'SmartEditor2Skin.html'
+    );
     postscribe(
       '#loadEditor',
-      '<script language="javascript" src="/public/NSE2/js/service/HuskyEZCreator.js" charset="utf-8"></script>'
+      '<script language="javascript" src="' + HuskyEZCreator + '" charset="utf-8"></script>'
     );
     postscribe(
       '#editor',
@@ -52,7 +73,7 @@ const TradeTemplateWriteScreen: React.FunctionComponent = () => {
     postscribe(
       '#afterEditor',
       '<script type="text/javascript">' +
-        'var oEditors = [];nhn.husky.EZCreator.createInIFrame({ oAppRef: oEditors, elPlaceHolder: "ir1", sSkinURI: "/public/NSE2/SmartEditor2Skin.html", fCreator: "createSEditor2"});' +
+        'var oEditors = [];nhn.husky.EZCreator.createInIFrame({ oAppRef: oEditors, elPlaceHolder: "ir1", sSkinURI: "' + SkinUrl + '", fCreator: "createSEditor2"});' +
         'function submitContents(elClickedObj) { oEditors.getById["ir1"].exec("UPDATE_CONTENTS_FIELD", []);};' +
         'setInterval(function() { ' +
         'submitContents(this);' +
@@ -88,11 +109,11 @@ const TradeTemplateWriteScreen: React.FunctionComponent = () => {
         setTemplate({ ...template, text: body.innerHTML });
         //TODO:발리데이션, 이미지 추출
         const prevTemplates = [...templates];
-        const found = prevTemplates.find(el => el.title === template.title)
+        const found = prevTemplates.find(el => el.title === template.title);
         if (found) {
-          console.log('이미 존재하는 제목입니다.')
+          console.log('이미 존재하는 제목입니다.');
         } else {
-          const newTemplates = [...templates, { ...template, text: body.innerHTML }]
+          const newTemplates = [...templates, { ...template, text: body.innerHTML }];
           try {
             await setTemplates(newTemplates);
             await setTemplatesOnDB(newTemplates);
@@ -109,9 +130,7 @@ const TradeTemplateWriteScreen: React.FunctionComponent = () => {
   return (
     <S.ContainerDiv>
       <S.HeaderRow>
-        <div>
-          {JSON.stringify(template)}
-        </div>
+        <div>{JSON.stringify(template)}</div>
         <Col span={20}>
           <S.ContainerTitleP>거래글 쓰기 화면입니다.</S.ContainerTitleP>
         </Col>
