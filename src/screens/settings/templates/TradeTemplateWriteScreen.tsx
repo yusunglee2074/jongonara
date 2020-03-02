@@ -42,7 +42,7 @@ const TradeTemplateWriteScreen: React.FunctionComponent = () => {
   useEffect(() => {
     const HuskyEZCreator = path.resolve(
       // @ts-ignore
-      remote.process['NODE_ENV'] === 'production' ? appPath: '/',
+      remote.process.env.NODE_ENV !== 'development' ? appPath : '/',
       'public',
       'NSE2',
       'js',
@@ -52,7 +52,7 @@ const TradeTemplateWriteScreen: React.FunctionComponent = () => {
     console.log(HuskyEZCreator);
     const SkinUrl = path.resolve(
       // @ts-ignore
-      remote.process['NODE_ENV'] === 'production' ? appPath: '/',
+      remote.process.env.NODE_ENV !== 'development' ? appPath: '/',
       'public',
       'NSE2',
       'SmartEditor2Skin.html'
