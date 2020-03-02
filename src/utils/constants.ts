@@ -42,8 +42,8 @@ export const HOME_SCREEN_TEMPLATE_TABLE_COL: Array<object> = [
   },
   {
     title: '내용',
-    dataIndex: 'content',
-    key: 'content'
+    dataIndex: 'text',
+    key: 'text'
   }
 ];
 

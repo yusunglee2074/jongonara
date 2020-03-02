@@ -1,8 +1,9 @@
 import * as React from 'react';
 import { Button, Row, Col, Input } from 'antd';
 import styled from 'styled-components';
-import { useEffect, useState } from 'react';
-import { ITemplate } from '../../../store/Store';
+import { useContext, useEffect, useState } from 'react'
+import { ITemplate, setTemplatesOnDB } from '../../../store/Store'
+import { RootContext } from '../../../context/AppContext'
 
 // @ts-ignore
 const postscribe = require('postscribe');
@@ -25,11 +26,12 @@ const S = {
 
 const NormalTemplateWriteScreen: React.FunctionComponent = () => {
   const [template, setTemplate] = useState({
-    type: 'normal',
+    type: '일반글',
     tags: '',
     title: '',
     text: ''
   } as ITemplate);
+  const { templates, setTemplates } = useContext(RootContext);
 
   useEffect(() => {
     postscribe(
@@ -65,7 +67,7 @@ const NormalTemplateWriteScreen: React.FunctionComponent = () => {
     );
   }, []);
 
-  const save = () => {
+  const save = async () => {
     const iframes = document.getElementsByTagName('iframe');
     const firstIframe = iframes[0];
     if (firstIframe) {
@@ -80,6 +82,22 @@ const NormalTemplateWriteScreen: React.FunctionComponent = () => {
         const body = bodies[0];
 
         setTemplate({ ...template, text: body.innerHTML });
+        //TODO:발리데이션, 이미지 추출
+        const prevTemplates = [...templates];
+        const found = prevTemplates.find(el => el.title === template.title)
+        if (found) {
+          console.log('이미 존재하는 제목입니다.')
+        } else {
+          const newTemplates = [...templates, { ...template, text: body.innerHTML }]
+          try {
+            await setTemplates(newTemplates);
+            await setTemplatesOnDB(newTemplates);
+          } catch (e) {
+            console.log(e);
+            await setTemplates(prevTemplates);
+            await setTemplatesOnDB(prevTemplates);
+          }
+        }
       }
     }
   };

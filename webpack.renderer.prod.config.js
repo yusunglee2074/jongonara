@@ -10,7 +10,8 @@ module.exports = merge.smart(baseConfig, {
   plugins: [
     new TerserPlugin({
       cache: true,
-      parallel: 4
+      parallel: 4,
+      exclude: ['./src/public/', './node_modules'],
     })
   ]
 });

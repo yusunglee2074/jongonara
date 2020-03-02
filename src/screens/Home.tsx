@@ -103,7 +103,7 @@ const HomeScreen: React.FunctionComponent = () => {
             </S.TableCol>
             <S.TableCol span={15}>
               <Table
-                rowKey={'naverId'}
+                rowKey={'title'}
                 columns={HOME_SCREEN_TEMPLATE_TABLE_COL}
                 dataSource={templates}
                 bordered={true}
