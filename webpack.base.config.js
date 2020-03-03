@@ -2,6 +2,7 @@
 
 const path = require('path');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
+const CssUrlRelativePlugin = require('css-url-relative-plugin')
 
 module.exports = {
     output: {
@@ -17,6 +18,7 @@ module.exports = {
     },
     devtool: 'source-map',
     plugins: [
+        new CssUrlRelativePlugin(),
         new CopyWebpackPlugin([ { from: 'src/public', to: 'public' }, ]),
     ]
 };
