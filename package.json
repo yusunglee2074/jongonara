@@ -66,7 +66,11 @@
       "target": "nsis"
     },
     "asar": true,
-    "asarUnpack": "node_modules/puppeteer/.local-chromium/**/*"
+    "asarUnpack": [
+      "node_modules/puppeteer/.local-chromium/**/*",
+      "src/public/**/*",
+      "dist/public/**/*"
+    ]
   },
   "repository": {
     "type": "git",
@@ -80,6 +84,7 @@
   "bugs": {
     "url": "https://github.com/snnsnn/electron-react-typescript/issues"
   },
+  "extraResources": "src/public/NES2/",
   "homepage": "https://github.com/snnsnn/electron-react-typescript",
   "devDependencies": {
     "@types/antd": "^1.0.0",

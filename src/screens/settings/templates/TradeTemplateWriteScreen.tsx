@@ -69,6 +69,8 @@ const TradeTemplateWriteScreen: React.FunctionComponent = () => {
       console.log('프로덕션 들어옴')
       HuskyEZCreator = path.resolve(
         appPath,
+        '..',
+        'app.asar.unpacked',
         'dist',
         'public',
         'NSE2',
@@ -78,6 +80,8 @@ const TradeTemplateWriteScreen: React.FunctionComponent = () => {
       );
       SkinUrl = path.resolve(
         appPath,
+        '..',
+        'app.asar.unpacked',
         'dist',
         'public',
         'NSE2',
@@ -102,7 +106,7 @@ const TradeTemplateWriteScreen: React.FunctionComponent = () => {
     postscribe(
       '#afterEditor',
       '<script type="text/javascript">' +
-        'var oEditors = [];nhn.husky.EZCreator.createInIFrame({ oAppRef: oEditors, elPlaceHolder: "ir1", sSkinURI: ' + SkinUrl + ', fCreator: "createSEditor2"});' +
+        'var oEditors = [];nhn.husky.EZCreator.createInIFrame({ oAppRef: oEditors, elPlaceHolder: "ir1", sSkinURI: "' + SkinUrl + '", fCreator: "createSEditor2"});' +
         'function submitContents(elClickedObj) { oEditors.getById["ir1"].exec("UPDATE_CONTENTS_FIELD", []);};' +
         'setInterval(function() { ' +
         'submitContents(this);' +
