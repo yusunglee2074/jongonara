@@ -87,6 +87,10 @@ const TradeTemplateWriteScreen: React.FunctionComponent = () => {
         'NSE2',
         'SmartEditor2Skin.html'
       );
+      const isWin = remote.process.platform === 'win32';
+      if (isWin) {
+        SkinUrl = SkinUrl.replace(/\\/g, '/')
+      }
       console.log(HuskyEZCreator)
       console.log(SkinUrl)
     }
