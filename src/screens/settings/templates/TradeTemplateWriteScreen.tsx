@@ -40,23 +40,52 @@ const TradeTemplateWriteScreen: React.FunctionComponent = () => {
   const { templates, setTemplates } = useContext(RootContext);
 
   useEffect(() => {
-    const HuskyEZCreator = path.resolve(
-      // @ts-ignore
-      remote.process.env.NODE_ENV !== 'development' ? appPath + '/dist' : '/',
-      'public',
-      'NSE2',
-      'js',
-      'service',
-      'HuskyEZCreator.js'
-    );
-    console.log(HuskyEZCreator);
-    const SkinUrl = path.resolve(
-      // @ts-ignore
-      remote.process.env.NODE_ENV !== 'development' ? appPath + '/dist' : '/',
-      'public',
-      'NSE2',
-      'SmartEditor2Skin.html'
-    );
+    const env = remote.process.env.NODE_ENV;
+    let HuskyEZCreator;
+    let SkinUrl;
+    console.log('앱패스', appPath)
+    console.log('퓨어패스', path.resolve())
+    console.log('퓨어패스2', path.resolve('/'))
+    console.log('환경변수', env);
+    if (env === 'development') {
+      console.log('디벨롭 들어옴')
+      HuskyEZCreator = path.resolve(
+        '/',
+        'public',
+        'NSE2',
+        'js',
+        'service',
+        'HuskyEZCreator.js'
+      );
+      SkinUrl = path.resolve(
+        '/',
+        'public',
+        'NSE2',
+        'SmartEditor2Skin.html'
+      );
+      console.log(HuskyEZCreator)
+      console.log(SkinUrl)
+    } else {
+      console.log('프로덕션 들어옴')
+      HuskyEZCreator = path.resolve(
+        appPath,
+        'dist',
+        'public',
+        'NSE2',
+        'js',
+        'service',
+        'HuskyEZCreator.js'
+      );
+      SkinUrl = path.resolve(
+        appPath,
+        'dist',
+        'public',
+        'NSE2',
+        'SmartEditor2Skin.html'
+      );
+      console.log(HuskyEZCreator)
+      console.log(SkinUrl)
+    }
     postscribe(
       '#loadEditor',
       '<script language="javascript" src="' + HuskyEZCreator + '" charset="utf-8"></script>'
