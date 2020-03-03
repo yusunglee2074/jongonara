@@ -7,11 +7,13 @@ const baseConfig = require('./webpack.renderer.config');
 
 module.exports = merge.smart(baseConfig, {
   mode: 'production',
-  plugins: [
-    new TerserPlugin({
-      exclude: /node_modules/,
-      cache: true,
-      parallel: 4,
-    })
-  ]
+  optimization: {
+    minimizer: [
+      new TerserPlugin({
+        exclude: /node_modules/,
+        cache: true,
+        parallel: true
+      })
+    ]
+  }
 });
