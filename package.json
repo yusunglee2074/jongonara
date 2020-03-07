@@ -137,7 +137,9 @@
   },
   "dependencies": {
     "@hot-loader/react-dom": "^16.11.0",
+    "@types/date-fns": "^2.6.0",
     "antd": "^3.26.11",
+    "date-fns": "^2.10.0",
     "electron-store": "^5.1.1",
     "postscribe": "^2.0.8",
     "puppeteer": "^2.1.1",

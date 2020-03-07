@@ -26,7 +26,6 @@ nhn.husky.EZCreator = new (function(){
 	this.nBlockerCount = 0;
 
 	this.createInIFrame = function(htOptions){
-	  console.log(htOptions)
 		if(arguments.length == 1){
 			var oAppRef = htOptions.oAppRef;
 			var elPlaceHolder = htOptions.elPlaceHolder;

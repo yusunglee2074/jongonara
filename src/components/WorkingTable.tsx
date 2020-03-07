@@ -1,21 +1,21 @@
 import * as React from 'react';
 import { Table } from 'antd';
-import { HOME_SCREEN_TEMPLATE_TABLE_COL } from '../utils/constants'
+import { HOME_SCREEN_WORKING_TABLE_COL } from '../utils/constants'
 import { ReactNode } from 'react';
-import { ITemplate } from '../store/Store'
+import { IWorking } from '../store/Store'
 
 interface IProps {
   title?: () => ReactNode;
   extraCols?: Array<object>;
-  dataSource?: Array<ITemplate>;
+  dataSource?: Array<IWorking>;
 }
 
-const TemplateTable: React.FC<IProps> = ({ title, extraCols = [], dataSource = [] }) => {
+const WorkingTable: React.FC<IProps> = ({ title, extraCols = [], dataSource = [] }) => {
   return (
     <Table
       pagination={false}
       rowKey={'title'}
-      columns={[...HOME_SCREEN_TEMPLATE_TABLE_COL, ...extraCols]}
+      columns={[...HOME_SCREEN_WORKING_TABLE_COL, ...extraCols]}
       dataSource={dataSource}
       scroll={{
         x: true,
@@ -31,4 +31,4 @@ const TemplateTable: React.FC<IProps> = ({ title, extraCols = [], dataSource = [
   );
 };
 
-export default TemplateTable;
+export default WorkingTable;

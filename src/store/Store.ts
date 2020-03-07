@@ -8,14 +8,6 @@ export interface INaverId {
   connection?: string;
 }
 
-export interface INaverCafe {
-  naverId: string;
-  cafeId: string;
-  cafeName: string;
-  cafeBoardId: string;
-  cafeBoardName: string;
-}
-
 export interface ITemplate {
   type: string;
   price?: number;
@@ -27,12 +19,14 @@ export interface ITemplate {
 }
 
 export interface IWorking {
-  type: string;
-  title: string;
-  text: string;
+  workingId: string;
+  minPerWrite: number;
+  checkFourBoards: boolean;
   naverId: string;
-  naverCafeId: string;
-  templateId: string;
+  cafeName: string;
+  cafeUrl: string;
+  boardNames: Array<string>;
+  templateTitle: string;
 }
 
 export interface ILog {

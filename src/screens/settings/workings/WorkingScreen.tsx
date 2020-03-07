@@ -1,11 +1,11 @@
 import * as React from 'react';
 import { Button, Row, Col } from 'antd';
 import styled from 'styled-components';
-import TemplateTable from '../../../components/TemplateTable';
 import { useContext } from 'react';
 import { RootContext } from '../../../context/AppContext';
-import { setTemplatesOnDB } from '../../../store/Store';
-import { Link } from 'react-router-dom'
+import { setWorkingsOnDB } from '../../../store/Store';
+import { Link } from 'react-router-dom';
+import WorkingTable from '../../../components/WorkingTable';
 
 const S = {
   ContainerDiv: styled.div`
@@ -17,42 +17,37 @@ const S = {
   `
 };
 
-const TemplateScreen: React.FunctionComponent = () => {
-  const { templates, setTemplates } = useContext(RootContext);
+const WorkingScreen: React.FunctionComponent = () => {
+  const { workings, setWorkings } = useContext(RootContext);
 
   const deleteTemplate = async (e: any, ...args: Array<any>) => {
     e.preventDefault();
     const [, record] = args;
-    const { title } = record;
+    const { workingId } = record;
     try {
-      const newTemplates = templates.filter(el => el.title !== title);
-      await setTemplates(newTemplates);
-      await setTemplatesOnDB(newTemplates);
+      const newWorkings = workings.filter(el => el.workingId !== workingId);
+      await setWorkings(newWorkings);
+      await setWorkingsOnDB(newWorkings);
     } catch (e) {
       console.log(e);
-      await setTemplates(templates);
-      await setTemplatesOnDB(templates);
+      await setWorkings(workings);
+      await setWorkingsOnDB(workings);
     }
   };
 
   return (
     <S.ContainerDiv>
-      <S.ContainerTitleP>글 템플릿 관리 페이지</S.ContainerTitleP>
+      <S.ContainerTitleP>작업 관리 페이지</S.ContainerTitleP>
       <Row>
         <Col span={10}>
-          <Link to={'/setting-template-trade-write'}>
-            <Button>거래 글 추가</Button>
-          </Link>
-        </Col>
-        <Col span={10}>
-          <Link to={'/setting-template-normal-write'}>
-            <Button>일반 글 추가</Button>
+          <Link to={'/setting-working-write'}>
+            <Button>작업 추가</Button>
           </Link>
         </Col>
       </Row>
 
-      <TemplateTable
-        dataSource={templates}
+      <WorkingTable
+        dataSource={workings}
         extraCols={[
           {
             title: '삭제',
@@ -68,4 +63,4 @@ const TemplateScreen: React.FunctionComponent = () => {
   );
 };
 
-export default TemplateScreen;
+export default WorkingScreen;

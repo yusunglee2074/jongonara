@@ -40,11 +40,6 @@ export const HOME_SCREEN_TEMPLATE_TABLE_COL: Array<object> = [
     dataIndex: 'title',
     key: 'title'
   },
-  {
-    title: '내용',
-    dataIndex: 'text',
-    key: 'text'
-  }
 ];
 
 export const HOME_SCREEN_WORKING_TABLE_COL: Array<object> = [

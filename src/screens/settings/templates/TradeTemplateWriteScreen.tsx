@@ -1,17 +1,14 @@
 import * as React from 'react';
-import { remote } from 'electron';
 import { Button, Row, Col, Input, Checkbox, InputNumber } from 'antd';
 import styled from 'styled-components';
-import { useContext, useEffect } from 'react';
+import { useContext } from 'react';
 import { useState } from 'react';
 import { ITemplate, setTemplatesOnDB } from '../../../store/Store';
 import { RootContext } from '../../../context/AppContext';
-import * as path from 'path';
-
-
-// @ts-ignore
-const postscribe = require('postscribe');
-const appPath = remote.app.getAppPath();
+import NaverSmartEditor from '../../../components/NaverSmartEditor';
+import { extractImgPathFromHTML, replaceImgPathToLocal } from '../../../utils/func'
+import { saveFile } from '../../../ipc/renderer-IPC';
+import { RouteComponentProps, withRouter } from 'react-router-dom'
 
 const S = {
   ContainerDiv: styled.div`
@@ -29,7 +26,7 @@ const S = {
   `
 };
 
-const TradeTemplateWriteScreen: React.FunctionComponent = () => {
+const TradeTemplateWriteScreen: React.FC<RouteComponentProps> = ({ history }) => {
   const [template, setTemplate] = useState({
     type: '거래글',
     price: 0,
@@ -39,98 +36,7 @@ const TradeTemplateWriteScreen: React.FunctionComponent = () => {
   } as ITemplate);
   const { templates, setTemplates } = useContext(RootContext);
 
-  useEffect(() => {
-    const env = remote.process.env.NODE_ENV;
-    let HuskyEZCreator;
-    let SkinUrl;
-    console.log('앱패스', appPath)
-    console.log('퓨어패스', path.resolve())
-    console.log('퓨어패스2', path.resolve('/'))
-    console.log('환경변수', env);
-    if (env === 'development') {
-      console.log('디벨롭 들어옴')
-      HuskyEZCreator = path.resolve(
-        '/',
-        'public',
-        'NSE2',
-        'js',
-        'service',
-        'HuskyEZCreator.js'
-      );
-      SkinUrl = path.resolve(
-        '/',
-        'public',
-        'NSE2',
-        'SmartEditor2Skin.html'
-      );
-      console.log(HuskyEZCreator)
-      console.log(SkinUrl)
-    } else {
-      console.log('프로덕션 들어옴')
-      HuskyEZCreator = path.resolve(
-        appPath,
-        '..',
-        'app.asar.unpacked',
-        'dist',
-        'public',
-        'NSE2',
-        'js',
-        'service',
-        'HuskyEZCreator.js'
-      );
-      SkinUrl = path.resolve(
-        appPath,
-        '..',
-        'app.asar.unpacked',
-        'dist',
-        'public',
-        'NSE2',
-        'SmartEditor2Skin.html'
-      );
-      const isWin = remote.process.platform === 'win32';
-      if (isWin) {
-        SkinUrl = SkinUrl.replace(/\\/g, '/')
-      }
-      console.log(HuskyEZCreator)
-      console.log(SkinUrl)
-    }
-    postscribe(
-      '#loadEditor',
-      '<script language="javascript" src="' + HuskyEZCreator + '" charset="utf-8"></script>'
-    );
-    postscribe(
-      '#editor',
-      '<div>' +
-        '<input id="imgfile" type="file" style="font-size: 12px;">' +
-        '<span style="font-size: 12px;">사진넓이</span><input id="imgwidth" type="text" value="740" style="font-size: 12px;">' +
-        '<button onclick="(function() {addImg()})()" style="font-size: 12px;">사진추가</button>' +
-        '<textarea name="ir1" id="ir1" rows="10" cols="60"/>' +
-        '</div>'
-    );
-    postscribe(
-      '#afterEditor',
-      '<script type="text/javascript">' +
-        'var oEditors = [];nhn.husky.EZCreator.createInIFrame({ oAppRef: oEditors, elPlaceHolder: "ir1", sSkinURI: "' + SkinUrl + '", fCreator: "createSEditor2"});' +
-        'function submitContents(elClickedObj) { oEditors.getById["ir1"].exec("UPDATE_CONTENTS_FIELD", []);};' +
-        'setInterval(function() { ' +
-        'submitContents(this);' +
-        '}, 1000);' +
-        'function addImg() {' +
-        'const imgTag = document.getElementById("imgfile");' +
-        'const imgFiles = imgTag.files;' +
-        'const imgFile = imgTag.files[0];' +
-        'const widthInput = document.getElementById("imgwidth");' +
-        'const imageWidth = widthInput.value;' +
-        ' imageHTML = "<img width=\'" + imageWidth + "\' " + "src=\'" + URL.createObjectURL(imgFile) + "\'/>";' +
-        'oEditors.getById["ir1"].exec("PASTE_HTML", [imageHTML]);' +
-        '};' +
-        '</script>'
-    );
-  }, []);
-
   const save = async () => {
-    const textarea = document.getElementById('ir1') as HTMLTextAreaElement;
-    console.log(textarea.value);
     const iframes = document.getElementsByTagName('iframe');
     const firstIframe = iframes[0];
     if (firstIframe) {
@@ -145,20 +51,30 @@ const TradeTemplateWriteScreen: React.FunctionComponent = () => {
         const body = bodies[0];
         setTemplate({ ...template, text: body.innerHTML });
         //TODO:발리데이션, 이미지 추출
-        const prevTemplates = [...templates];
-        const found = prevTemplates.find(el => el.title === template.title);
-        if (found) {
-          console.log('이미 존재하는 제목입니다.');
-        } else {
-          const newTemplates = [...templates, { ...template, text: body.innerHTML }];
-          try {
+        const imgPaths: Array<string> = extractImgPathFromHTML(body.innerHTML);
+
+        try {
+          const blobArr = await Promise.all(imgPaths.map(item => fetch(item).then(r => r.blob())));
+          const localImagePaths: Array<string> = [];
+          for (let i = 0; i < blobArr.length; i++) {
+            localImagePaths.push(await saveFile(blobArr[i]));
+          }
+
+          const replaceImagePathHtml = replaceImgPathToLocal(body.innerHTML, localImagePaths);
+
+          const found = templates.find(el => el.title === template.title);
+          if (found) {
+            console.log('이미 존재하는 제목입니다.');
+          } else {
+            const newTemplates = [...templates, { ...template, text: replaceImagePathHtml }];
             await setTemplates(newTemplates);
             await setTemplatesOnDB(newTemplates);
-          } catch (e) {
-            console.log(e);
-            await setTemplates(prevTemplates);
-            await setTemplatesOnDB(prevTemplates);
+            history.push('/home')
           }
+        } catch (e) {
+          console.log('에러', e);
+          await setTemplates(templates);
+          await setTemplatesOnDB(templates);
         }
       }
     }
@@ -167,7 +83,6 @@ const TradeTemplateWriteScreen: React.FunctionComponent = () => {
   return (
     <S.ContainerDiv>
       <S.HeaderRow>
-        <div>{JSON.stringify(template)}</div>
         <Col span={20}>
           <S.ContainerTitleP>거래글 쓰기 화면입니다.</S.ContainerTitleP>
         </Col>
@@ -215,9 +130,7 @@ const TradeTemplateWriteScreen: React.FunctionComponent = () => {
       </S.HeaderRow>
       <S.BodyRow>
         <Col span={24}>
-          <div id={'loadEditor'} />
-          <div id={'editor'} />
-          <div id={'afterEditor'} />
+          <NaverSmartEditor />
         </Col>
         <img src="" />
       </S.BodyRow>
@@ -225,4 +138,4 @@ const TradeTemplateWriteScreen: React.FunctionComponent = () => {
   );
 };
 
-export default TradeTemplateWriteScreen;
+export default withRouter(TradeTemplateWriteScreen);

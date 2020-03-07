@@ -103,6 +103,7 @@ const HomeScreen: React.FunctionComponent = () => {
             </S.TableCol>
             <S.TableCol span={15}>
               <Table
+                pagination={false}
                 rowKey={'title'}
                 columns={HOME_SCREEN_TEMPLATE_TABLE_COL}
                 dataSource={templates}
@@ -121,6 +122,7 @@ const HomeScreen: React.FunctionComponent = () => {
           </Row>
           <S.TableCol>
             <Table
+              pagination={false}
               rowKey={'naverId'}
               columns={HOME_SCREEN_WORKING_TABLE_COL}
               dataSource={workings}
@@ -138,6 +140,7 @@ const HomeScreen: React.FunctionComponent = () => {
           </S.TableCol>
           <S.TableCol>
             <Table
+              pagination={false}
               rowKey={'naverId'}
               columns={HOME_SCREEN_LOG_TABLE_COL}
               dataSource={logs}

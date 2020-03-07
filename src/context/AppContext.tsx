@@ -39,7 +39,8 @@ const RootContextProvider = (props: any) => {
   useEffect(() => {
     // 애플리케이션 시작시, 기타 초기화 루틴도 적용 예정, 시작시 단 한번만 실행
     const initDB = async () => {
-      setNaverIds(await getNaverIdsOnDB());
+      const naverIdsOnDB = await getNaverIdsOnDB();
+      setNaverIds(naverIdsOnDB.map(el => ({ ...el, connection: '로그인을 시도해주세요.' })));
       setTemplates(await getTemplatesOnDB());
       setWorkings(await getWorkingsOnDB());
       setLogs(await getLogsOnDB());

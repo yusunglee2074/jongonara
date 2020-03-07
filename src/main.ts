@@ -1,7 +1,7 @@
 import { app, BrowserWindow } from 'electron';
 import * as path from 'path';
 import * as url from 'url';
-import mainIPC from './ipc/main-IPC'
+import mainIPC from './ipc/main-IPC';
 
 let win: BrowserWindow | null;
 
@@ -21,10 +21,12 @@ const createWindow = async () => {
   }
 
   win = new BrowserWindow({
+    title: '네이버 카페 자동 등록기',
     width: 1280,
     height: 720,
     webPreferences: {
-      nodeIntegration: true
+      nodeIntegration: true,
+      webSecurity: false
     }
   });
 
@@ -42,7 +44,6 @@ const createWindow = async () => {
     );
   }
 
-
   if (process.env.NODE_ENV !== 'production') {
     // Open DevTools
     win.webContents.openDevTools();
@@ -50,8 +51,8 @@ const createWindow = async () => {
 
   win.on('closed', () => {
     win = null;
+    app.quit();
   });
-
 };
 
 app.on('ready', async () => {

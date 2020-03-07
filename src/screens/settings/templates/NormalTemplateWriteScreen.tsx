@@ -1,12 +1,10 @@
 import * as React from 'react';
 import { Button, Row, Col, Input } from 'antd';
 import styled from 'styled-components';
-import { useContext, useEffect, useState } from 'react'
+import { useContext, useState } from 'react'
 import { ITemplate, setTemplatesOnDB } from '../../../store/Store'
 import { RootContext } from '../../../context/AppContext'
-
-// @ts-ignore
-const postscribe = require('postscribe');
+import NaverSmartEditor from '../../../components/NaverSmartEditor'
 
 const S = {
   ContainerDiv: styled.div`
@@ -32,40 +30,6 @@ const NormalTemplateWriteScreen: React.FunctionComponent = () => {
     text: ''
   } as ITemplate);
   const { templates, setTemplates } = useContext(RootContext);
-
-  useEffect(() => {
-    postscribe(
-      '#loadEditor',
-      '<script language="javascript" src="/public/NSE2/js/service/HuskyEZCreator.js" charset="utf-8"></script>'
-    );
-    postscribe(
-      '#editor',
-      '<div><input id="imgfile" type="file" style="font-size: 12px;">' +
-        '<span style="font-size: 12px;">사진넓이</span><input id="imgwidth" type="text" value="740" style="font-size: 12px;">' +
-        '<button onclick="(function() {addImg()})()" style="font-size: 12px;">사진추가</button>' +
-        '<textarea name="ir1" id="ir1" rows="10" cols="60"></textarea>' +
-        '</div>'
-    );
-    postscribe(
-      '#afterEditor',
-      '<script type="text/javascript">' +
-        'var oEditors = [];nhn.husky.EZCreator.createInIFrame({ oAppRef: oEditors, elPlaceHolder: "ir1", sSkinURI: "/public/NSE2/SmartEditor2Skin.html", fCreator: "createSEditor2"});' +
-        'function submitContents(elClickedObj) { oEditors.getById["ir1"].exec("UPDATE_CONTENTS_FIELD", []);};' +
-        'setInterval(function() { ' +
-        'submitContents(this);' +
-        '}, 1000);' +
-        'function addImg() {' +
-        'const imgTag = document.getElementById("imgfile");' +
-        'const imgFiles = imgTag.files;' +
-        'const imgFile = imgTag.files[0];' +
-        'const widthInput = document.getElementById("imgwidth");' +
-        'const imageWidth = widthInput.value;' +
-        ' imageHTML = "<img width=\'" + imageWidth + "\' " + "src=\'" + URL.createObjectURL(imgFile) + "\'/>";' +
-        'oEditors.getById["ir1"].exec("PASTE_HTML", [imageHTML]);' +
-        '};' +
-        '</script>'
-    );
-  }, []);
 
   const save = async () => {
     const iframes = document.getElementsByTagName('iframe');
@@ -126,9 +90,7 @@ const NormalTemplateWriteScreen: React.FunctionComponent = () => {
       </S.HeaderRow>
       <S.BodyRow>
         <Col span={24}>
-          <div id={'loadEditor'} />
-          <div id={'editor'} />
-          <div id={'afterEditor'} />
+          <NaverSmartEditor/>
         </Col>
       </S.BodyRow>
     </S.ContainerDiv>
