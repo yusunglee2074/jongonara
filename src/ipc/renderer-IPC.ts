@@ -10,23 +10,31 @@ export const getNaverCafes = async (naverId: string) => {
   return await ipcRenderer.invoke('getNaverCafes', naverId);
 };
 
-export const saveFile = async (file: File) => {
-  async function readFile(file: File): Promise<string> {
-    return await new Promise(resolve => {
-      let fileReader = new FileReader();
-      fileReader.onload = () => {
-        if (fileReader.result) {
-          const buffer = Buffer.from(fileReader.result);
-          const fileName: string = format(new Date(), 'yyyyMMddssSSS'); //rename file
-          resolve(ipcRenderer.invoke('saveFile', fileName, buffer));
-        }
-      };
-      fileReader.readAsArrayBuffer(file);
-    });
-  }
-
-  return readFile(file);
+export const saveFile = async (filePaths: Array<string>) => {
+  return ipcRenderer.invoke('saveFile', filePaths);
 };
+// export const saveFile = async (files: Array<File>) => {
+//   async function readFile(file: File): Promise<any> {
+//     return await new Promise(resolve => {
+//       let fileReader = new FileReader();
+//       fileReader.onload = () => {
+//         if (fileReader.result) {
+//           resolve(Buffer.from(fileReader.result));
+//         }
+//       };
+//       fileReader.readAsArrayBuffer(file);
+//     });
+//   }
+//
+//   const bufferFiles: Array<any> = [];
+//   for (const file of files) {
+//     bufferFiles.push({
+//       fileName: format(new Date(), 'yyyyMMddssSSS'),
+//       buffer: await readFile(file)
+//     });
+//   }
+//   return ipcRenderer.invoke('saveFile', bufferFiles);
+// };
 
 export const saveFiles = async (blobArr: Array<Blob>) => {
   const promiseArr: Array<Promise<any>> = [];

@@ -1,10 +1,10 @@
-import * as puppeteer from 'puppeteer';
+import * as puppeteer from 'puppeteer'
+import { Browser, ElementHandle, Page } from 'puppeteer'
 // import { app } from 'electron';
-import { PUPPETEER_BROWSER_OPTIONS_ARGS } from '../utils/constants';
-import { ipcMain } from 'electron';
-import { INaverId } from '../store/Store';
-import { Browser, ElementHandle, Page } from 'puppeteer';
-import errorCodes from '../utils/errorCodes';
+import { PUPPETEER_BROWSER_OPTIONS_ARGS } from '../utils/constants'
+import { ipcMain } from 'electron'
+import { INaverId } from '../store/Store'
+import errorCodes from '../utils/errorCodes'
 // import * as path from 'path'
 // import { format } from 'date-fns';
 // import * as fs from 'fs'
@@ -132,22 +132,39 @@ const mainIPC = async () => {
     }
   );
 
-  ipcMain.handle('saveFile', async (_e: any, fileName: string, buffer: Buffer) => {
-    // 이미지 네이버 카페에 올린다음에 해당 주소를 리턴해주자.
-    // 1. 브라우저 아무꺼나 하나 잡아서 카페 목록 1순위의 카페로 이동한다.
-    // 2. 글쓰기 버튼을 누른다.(팝업이 뜬다면 2순위 카페로 이동한다.)
-    // 3. 사진 버튼을 눌러서 팝업버튼이 뜬다면 노드js 이용해서 임시로 파일 저장한다음
-    // 4. 사진 경로를 가져와서 리턴한다.
-    console.time(fileName);
-    console.time(buffer.toString());
+  ipcMain.handle('saveFile', async (_e: any, filePaths: Array<string>) => {
 
-    const a = await uploadPhotoOnCafe([
-      '/Users/yusunglee2074/Desktop/Screenshot_1573881747.png',
-      '/Users/yusunglee2074/Desktop/Screenshot_1573881748.png'
-    ]);
-    console.log(a);
-    return a;
+    try {
+      return await uploadPhotoOnCafe(filePaths);
+    } catch (e) {
+      throw Error(e);
+    }
+
   });
+  // ipcMain.handle('saveFile', async (_e: any, bufferFiles: Array<any>) => {
+  //
+  //   const removeTempLocalFiles = (paths: Array<string>) => {
+  //     for (const path of paths) {
+  //       fs.unlinkSync(path);
+  //     }
+  //   }
+  //
+  //   const tempLocalFilePaths = [];
+  //   for (const file of bufferFiles) {
+  //     const tempPath = path.resolve(app.getAppPath(), '..', file.fileName);
+  //     fs.writeFileSync(tempPath, file.buffer);
+  //     tempLocalFilePaths.push(tempPath);
+  //   }
+  //   try {
+  //     const result = await uploadPhotoOnCafe(tempLocalFilePaths);
+  //     removeTempLocalFiles(tempLocalFilePaths);
+  //     return result;
+  //   } catch (e) {
+  //     removeTempLocalFiles(tempLocalFilePaths);
+  //     throw Error(e);
+  //   }
+  //
+  // });
 
   ipcMain.handle('getNaverCafes', async (_e: any, naverId: string) => {
     const getNames = async (page: Page, buttonHandler?: ElementHandle) => {
