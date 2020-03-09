@@ -1,18 +1,17 @@
 import * as puppeteer from 'puppeteer';
 // import { app } from 'electron';
 import { PUPPETEER_BROWSER_OPTIONS_ARGS } from '../utils/constants';
-import { ipcMain, app } from 'electron';
+import { ipcMain } from 'electron';
 import { INaverId } from '../store/Store';
-import * as fs from 'fs';
-import * as path from 'path';
 import { Browser, ElementHandle, Page } from 'puppeteer';
+import errorCodes from '../utils/errorCodes';
 // import * as path from 'path'
 // import { format } from 'date-fns';
 // import * as fs from 'fs'
 
 const env = process.env.NODE_ENV;
 
-let pages: any = {};
+let browsers: any = {};
 
 const isWin = process.platform === 'win32';
 
@@ -40,8 +39,7 @@ const mainIPC = async () => {
 
   const options = {
     args: PUPPETEER_BROWSER_OPTIONS_ARGS,
-    ignoreHTTPSErrors: true,
-    headless: false
+    ignoreHTTPSErrors: true
   };
 
   ipcMain.handle(
@@ -80,7 +78,7 @@ const mainIPC = async () => {
 
           const isLoggedIn = page.url().indexOf('www.naver.com') > -1;
 
-          return { id: naverId, page, browser, isLoggedIn };
+          return { id: naverId, page, browser, isLoggedIn, password };
         } catch (err) {
           console.log(err);
           console.log(err.message);
@@ -91,33 +89,42 @@ const mainIPC = async () => {
 
       const promiseArr = [];
 
-      for (let i = 0; i < Object.keys(pages).length; i++) {
-        const key = Object.keys(pages)[i];
-        const browser = pages[key].browser;
+      for (let i = 0; i < Object.keys(browsers).length; i++) {
+        const key = Object.keys(browsers)[i];
+        const browser = browsers[key].browser;
         promiseArr.push(browser.close());
       }
 
       await Promise.all(promiseArr);
       promiseArr.length = 0;
-      pages = {};
+      browsers = {};
 
       for (let i = 0; i < naverIds.length; i++) {
         const { id, password } = naverIds[i];
-        if (!pages[id]) promiseArr.push(createPage(id, password));
-        else await pages[id].page.reload();
+        if (!browsers[id]) promiseArr.push(createPage(id, password));
+        else await browsers[id].page.reload();
       }
 
       try {
         const result = await Promise.all(promiseArr);
         const loginFailIds: Array<any> = [];
-        result.map(({ id, page, browser, isLoggedIn }) => {
+        result.map(({ id, page, browser, isLoggedIn, password }) => {
           if (!isLoggedIn) {
             loginFailIds.push(id);
             browser.close();
           } else {
-            pages = { ...pages, [id]: { page, browser } };
+            browsers = { ...browsers, [id]: { page, browser, id, password } };
           }
         });
+
+        // 이미지 업로드용 브라우저 하나더 띄우자
+        const firstLoggedInBrowser = browsers[Object.keys(browsers)[0]];
+        const { id, password } = firstLoggedInBrowser;
+        browsers.imageUpload = await createPage(id, password);
+        const { page } = browsers.imageUpload;
+
+        await initUploadImagePage(page);
+
         return loginFailIds;
       } catch (err) {
         throw Error(err);
@@ -125,45 +132,26 @@ const mainIPC = async () => {
     }
   );
 
-  ipcMain.handle('saveFiles', async (_e: any, fileName: string, buffer: Buffer) => {
-    const imagePath = path.join(app.getPath('userData'), 'images', fileName + '.jpg');
-    fs.mkdirSync(path.join(app.getPath('userData'), 'images'), { recursive: true });
-    fs.writeFileSync(imagePath, buffer);
-    return imagePath;
+  ipcMain.handle('saveFile', async (_e: any, fileName: string, buffer: Buffer) => {
+    // 이미지 네이버 카페에 올린다음에 해당 주소를 리턴해주자.
+    // 1. 브라우저 아무꺼나 하나 잡아서 카페 목록 1순위의 카페로 이동한다.
+    // 2. 글쓰기 버튼을 누른다.(팝업이 뜬다면 2순위 카페로 이동한다.)
+    // 3. 사진 버튼을 눌러서 팝업버튼이 뜬다면 노드js 이용해서 임시로 파일 저장한다음
+    // 4. 사진 경로를 가져와서 리턴한다.
+    console.time(fileName);
+    console.time(buffer.toString());
+
+    const a = await uploadPhotoOnCafe([
+      '/Users/yusunglee2074/Desktop/Screenshot_1573881747.png',
+      '/Users/yusunglee2074/Desktop/Screenshot_1573881748.png'
+    ]);
+    console.log(a);
+    return a;
   });
 
   ipcMain.handle('getNaverCafes', async (_e: any, naverId: string) => {
-    const waitForNetworkIdle = (page: Page, timeout: number, maxInflightRequests = 0) => {
-      page.on('request', onRequestStarted);
-      page.on('requestfinished', onRequestFinished);
-      page.on('requestfailed', onRequestFinished);
-
-      let inflight = 0;
-      let fulfill: any;
-      let promise = new Promise(x => (fulfill = x));
-      let timeoutId = setTimeout(onTimeoutDone, timeout);
-      return promise;
-
-      function onTimeoutDone() {
-        page.removeListener('request', onRequestStarted);
-        page.removeListener('requestfinished', onRequestFinished);
-        page.removeListener('requestfailed', onRequestFinished);
-        fulfill();
-      }
-
-      function onRequestStarted() {
-        ++inflight;
-        if (inflight > maxInflightRequests) clearTimeout(timeoutId);
-      }
-
-      function onRequestFinished() {
-        if (inflight === 0) return;
-        --inflight;
-        if (inflight === maxInflightRequests) timeoutId = setTimeout(onTimeoutDone, timeout);
-      }
-    };
-
     const getNames = async (page: Page, buttonHandler?: ElementHandle) => {
+      page.$;
       try {
         if (buttonHandler)
           await Promise.all([buttonHandler.click(), waitForNetworkIdle(page, 500, 0)]);
@@ -191,31 +179,142 @@ const mainIPC = async () => {
 
         for (const buttonHandler of paginationButtonHandlers) {
           console.log(await page.evaluate(el => el.innerText, buttonHandler));
-          console.log('아우터포 시작');
           names = [...names, ...(await getNames(page, buttonHandler))];
-          console.log('아우터포 종료');
         }
       }
       return names;
     } catch (e) {
-      throw Error(e);
+      return e;
     }
   });
 };
 
-const getLoggedBrowser = (naverId: string) => {
+const getLoggedBrowser = (naverId?: string) => {
   const result = {} as { page: Page; browser: Browser };
-  for (let i = 0; i < Object.keys(pages).length; i++) {
-    const id = Object.keys(pages)[i];
-    if (id === naverId) {
-      result.page = pages[id].page;
-      result.browser = pages[id].browser;
+  for (let i = 0; i < Object.keys(browsers).length; i++) {
+    const id = Object.keys(browsers)[i];
+    if (naverId && id === naverId) {
+      result.page = browsers[id].page;
+      result.browser = browsers[id].browser;
+    } else if (!naverId) {
+      result.page = browsers[id].page;
+      result.browser = browsers[id].browser;
     }
   }
   if (!result.page || !result.browser) {
-    throw Error('해당 브라우저가 없습니다.');
+    throw Error(errorCodes['401']);
   }
   return result;
+};
+
+const uploadPhotoOnCafe = async (filePaths: Array<string>) => {
+  // 글쓰기 페이지에서 사진 추가 팝업 띄움
+  try {
+    const { page, browser } = browsers.imageUpload;
+    if (!page) {
+      throw Error('이미지 업로드용 브라우저가 실행되지 않았습니다.');
+    }
+
+    await page.waitForSelector('iframe');
+    const iframeHandler = await page.$('div#main-area iframe');
+    const frame = await iframeHandler?.contentFrame();
+    const imageUploadButtonHandler = await frame?.waitForSelector('li#iImage a');
+    await imageUploadButtonHandler?.click();
+
+    const newPagePromise: Promise<Page> = new Promise(resolve =>
+      browser.once('targetcreated', async (target: any) => resolve(await target.page()))
+    );
+    const popupPage = await newPagePromise;
+    await popupPage.waitForSelector('body > div.npe_alert_wrap.on > div', { visible: true });
+    const modalCloseHandler = await popupPage.waitForSelector('.npe_alert_btn_close', {
+      visible: true
+    });
+    await modalCloseHandler.click();
+    await popupPage.waitForSelector('.npu_btn_icon.npu_btn_mypc', { visible: true });
+    const [fileChooser] = await Promise.all([
+      popupPage.waitForFileChooser(),
+      popupPage.click('.npu_btn_icon.npu_btn_mypc') // some button that triggers file selection
+    ]);
+    await Promise.all([fileChooser.accept(filePaths), waitForNetworkIdle(page, 500, 0)]);
+
+    // 업로드 기다림
+    await popupPage.waitForSelector('body > div.npe_alert_wrap', { hidden: true });
+
+    const finishUploadButtonHandler = await popupPage.$('button.npu_btn.npu_btn_submit');
+    await Promise.all([
+      finishUploadButtonHandler?.click(),
+      waitForNetworkIdle(popupPage, 500, 0),
+      waitForNetworkIdle(page, 500, 0)
+    ]);
+
+    await Promise.all([page.waitFor(200), waitForNetworkIdle(page, 500, 0)]);
+    const editorFrameHandler = await frame?.$('td.read iframe');
+    const editorFrame = await editorFrameHandler?.contentFrame();
+    await editorFrame?.waitForSelector('body img');
+    const imageHandlers = await editorFrame?.$$('body img');
+
+    const result = [];
+    for (const hdl of imageHandlers || []) {
+      result.push(
+        await editorFrame?.evaluate((el: HTMLImageElement) => {
+          const src = el.src;
+          el.remove();
+          return src;
+        }, hdl)
+      );
+    }
+
+    return result;
+  } catch (e) {
+    throw Error(e.message);
+  }
+};
+
+const initUploadImagePage = async (page: Page) => {
+  // TODO: 카페 글쓰기 권한 없을 경우 다음 카페로 이동할 수 있게 해야함
+  await Promise.all([
+    page.goto('https://section.cafe.naver.com/cafe-home/mycafe/join'),
+    waitForNetworkIdle(page, 500, 0)
+  ]);
+
+  const cafeLinkHandlers = await page.$$('a.cafe_name');
+  const cafeUrl = await page.evaluate(el => el.href, cafeLinkHandlers[0]);
+  // const writeable = false;
+
+  // 카페 이동 후 글 쓰기 페이지까지 이동
+  await Promise.all([page.goto(cafeUrl), waitForNetworkIdle(page, 500, 0)]);
+  const writeButtonHandler = await page.waitForSelector('.cafe-write-btn a');
+  await Promise.all([writeButtonHandler?.click(), waitForNetworkIdle(page, 500, 0)]);
+};
+
+const waitForNetworkIdle = (page: Page, timeout: number, maxInflightRequests = 0) => {
+  page.on('request', onRequestStarted);
+  page.on('requestfinished', onRequestFinished);
+  page.on('requestfailed', onRequestFinished);
+
+  let inflight = 0;
+  let fulfill: any;
+  let promise = new Promise(x => (fulfill = x));
+  let timeoutId = setTimeout(onTimeoutDone, timeout);
+  return promise;
+
+  function onTimeoutDone() {
+    page.removeListener('request', onRequestStarted);
+    page.removeListener('requestfinished', onRequestFinished);
+    page.removeListener('requestfailed', onRequestFinished);
+    fulfill();
+  }
+
+  function onRequestStarted() {
+    ++inflight;
+    if (inflight > maxInflightRequests) clearTimeout(timeoutId);
+  }
+
+  function onRequestFinished() {
+    if (inflight === 0) return;
+    --inflight;
+    if (inflight === maxInflightRequests) timeoutId = setTimeout(onTimeoutDone, timeout);
+  }
 };
 
 export default mainIPC;

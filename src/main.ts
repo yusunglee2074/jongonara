@@ -3,6 +3,8 @@ import * as path from 'path';
 import * as url from 'url';
 import mainIPC from './ipc/main-IPC';
 
+// const serviceAccount = require("../jongonara-10b67-firebase-adminsdk-nevug-5bdda1479f.json");
+
 let win: BrowserWindow | null;
 
 const installExtensions = async () => {
@@ -30,7 +32,10 @@ const createWindow = async () => {
     }
   });
 
+  // Main IPC 설정
   await mainIPC();
+
+  // firebase 설정
 
   if (process.env.NODE_ENV !== 'production') {
     win.loadURL(`http://localhost:2003`);

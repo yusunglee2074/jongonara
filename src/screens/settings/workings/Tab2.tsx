@@ -5,6 +5,7 @@ import { useEffect, useState } from 'react';
 import { getNaverCafes } from '../../../ipc/renderer-IPC';
 import { IWorking } from '../../../store/Store';
 import { RadioChangeEvent } from 'antd/lib/radio/interface';
+import errorCodes from '../../../utils/errorCodes'
 
 const S = {
   ContainerDiv: styled.div`
@@ -38,10 +39,14 @@ const Tab2: React.FC<IProps> = ({ working, setWorking, cafeList, setCafeList }) 
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    console.log(setWorking);
-
     const getCafe = async () => {
-      setCafeList(await getCafeLists());
+      try {
+        setCafeList(await getCafeLists());
+      } catch (e) {
+        if (e.message === errorCodes['401']) {
+          console.log('로그인을 먼저 진행해주세요.')
+        }
+      }
     };
     if (cafeList.length === 0) {
       getCafe();

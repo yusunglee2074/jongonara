@@ -13,6 +13,7 @@ export interface ITemplate {
   price?: number;
   exposePhoneNumber?: boolean;
   useTempPhoneNumber?: boolean;
+  repBase64Image: string;
   tags?: string;
   title: string;
   text: string;

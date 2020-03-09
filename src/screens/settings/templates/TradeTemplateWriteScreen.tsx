@@ -6,8 +6,6 @@ import { useState } from 'react';
 import { ITemplate, setTemplatesOnDB } from '../../../store/Store';
 import { RootContext } from '../../../context/AppContext';
 import NaverSmartEditor from '../../../components/NaverSmartEditor';
-import { extractImgPathFromHTML, replaceImgPathToLocal } from '../../../utils/func'
-import { saveFile } from '../../../ipc/renderer-IPC';
 import { RouteComponentProps, withRouter } from 'react-router-dom'
 
 const S = {
@@ -50,23 +48,14 @@ const TradeTemplateWriteScreen: React.FC<RouteComponentProps> = ({ history }) =>
         const bodies = secondInnerDoc.getElementsByTagName('body');
         const body = bodies[0];
         setTemplate({ ...template, text: body.innerHTML });
-        //TODO:발리데이션, 이미지 추출
-        const imgPaths: Array<string> = extractImgPathFromHTML(body.innerHTML);
+        //TODO:발리데이션
 
         try {
-          const blobArr = await Promise.all(imgPaths.map(item => fetch(item).then(r => r.blob())));
-          const localImagePaths: Array<string> = [];
-          for (let i = 0; i < blobArr.length; i++) {
-            localImagePaths.push(await saveFile(blobArr[i]));
-          }
-
-          const replaceImagePathHtml = replaceImgPathToLocal(body.innerHTML, localImagePaths);
-
           const found = templates.find(el => el.title === template.title);
           if (found) {
             console.log('이미 존재하는 제목입니다.');
           } else {
-            const newTemplates = [...templates, { ...template, text: replaceImagePathHtml }];
+            const newTemplates = [...templates, { ...template, text: body.innerText }];
             await setTemplates(newTemplates);
             await setTemplatesOnDB(newTemplates);
             history.push('/home')
