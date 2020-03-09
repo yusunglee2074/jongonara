@@ -30,10 +30,17 @@ const mainIPC = async () => {
           .replace('dist', 'node_modules/puppeteer');
       }
     } else {
-      const text = puppeteer
-        .executablePath()
-        .replace('app.asar', 'app.asar.unpacked/node_modules/puppeteer');
-      return text.replace('/dist', '/node_modules/puppeteer');
+      if (isWin) {
+        const text = puppeteer
+          .executablePath()
+          .replace('app.asar', 'app.asar.unpacked/node_modules/puppeteer');
+        text.replace('\\dist', '\\node_modules\\puppeteer');
+      } else {
+        const text = puppeteer
+          .executablePath()
+          .replace('app.asar', 'app.asar.unpacked/node_modules/puppeteer');
+        return text.replace('/dist', '/node_modules/puppeteer');
+      }
     }
   };
 
