@@ -1,10 +1,10 @@
-import * as puppeteer from 'puppeteer'
-import { Browser, ElementHandle, Page } from 'puppeteer'
+import * as puppeteer from 'puppeteer';
+import { Browser, ElementHandle, Page } from 'puppeteer';
 // import { app } from 'electron';
-import { PUPPETEER_BROWSER_OPTIONS_ARGS } from '../utils/constants'
-import { ipcMain } from 'electron'
-import { INaverId } from '../store/Store'
-import errorCodes from '../utils/errorCodes'
+import { PUPPETEER_BROWSER_OPTIONS_ARGS } from '../utils/constants';
+import { ipcMain } from 'electron';
+import { INaverId } from '../store/Store';
+import errorCodes from '../utils/errorCodes';
 // import * as path from 'path'
 // import { format } from 'date-fns';
 // import * as fs from 'fs'
@@ -133,13 +133,11 @@ const mainIPC = async () => {
   );
 
   ipcMain.handle('saveFile', async (_e: any, filePaths: Array<string>) => {
-
     try {
       return await uploadPhotoOnCafe(filePaths);
     } catch (e) {
       throw Error(e);
     }
-
   });
   // ipcMain.handle('saveFile', async (_e: any, bufferFiles: Array<any>) => {
   //
@@ -168,7 +166,6 @@ const mainIPC = async () => {
 
   ipcMain.handle('getNaverCafes', async (_e: any, naverId: string) => {
     const getNames = async (page: Page, buttonHandler?: ElementHandle) => {
-      page.$;
       try {
         if (buttonHandler)
           await Promise.all([buttonHandler.click(), waitForNetworkIdle(page, 500, 0)]);
@@ -299,9 +296,15 @@ const initUploadImagePage = async (page: Page) => {
   // const writeable = false;
 
   // 카페 이동 후 글 쓰기 페이지까지 이동
-  await Promise.all([page.goto(cafeUrl), waitForNetworkIdle(page, 500, 0)]);
-  const writeButtonHandler = await page.waitForSelector('.cafe-write-btn a');
-  await Promise.all([writeButtonHandler?.click(), waitForNetworkIdle(page, 500, 0)]);
+  await Promise.all([
+    page.goto(cafeUrl),
+    waitForNetworkIdle(page, 500, 0),
+    page.waitForNavigation({
+      waitUntil: 'networkidle0'
+    })
+  ]);
+  const writeButtonHandler = await page.waitForSelector('.cafe-write-btn a', { visible: true });
+  await writeButtonHandler?.click();
 };
 
 const waitForNetworkIdle = (page: Page, timeout: number, maxInflightRequests = 0) => {
