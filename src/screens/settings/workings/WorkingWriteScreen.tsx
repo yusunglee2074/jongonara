@@ -1,13 +1,14 @@
 import * as React from 'react';
-import { Col, Row, Button } from 'antd';
+import { Col, Row, Button, message } from 'antd';
 import styled from 'styled-components';
 import { RouteComponentProps, withRouter } from 'react-router-dom';
-import { useEffect, useState } from 'react';
+import { useContext, useState } from 'react'
 import Tab1 from './Tab1';
 import Tab3 from './Tab3';
 import Tab2 from './Tab2';
 import Tab4 from './Tab4';
-import { IWorking } from '../../../store/Store'
+import { IWorking, setWorkingsOnDB } from '../../../store/Store'
+import { RootContext } from '../../../context/AppContext'
 
 const S = {
   ContainerDiv: styled.div`
@@ -28,6 +29,7 @@ const S = {
 const WorkingWriteScreen: React.FC<RouteComponentProps> = () => {
   const [tabIdx, setTabIdx] = useState(0);
   const [cafeList, setCafeList] = useState([]);
+  const [boardList, setBoardList] = useState([]);
   const [working, setWorking] = useState({
     workingId: '',
     minPerWrite: 5,
@@ -36,8 +38,10 @@ const WorkingWriteScreen: React.FC<RouteComponentProps> = () => {
     cafeName: '',
     cafeUrl: '',
     boardNames: [],
-    templateTitle: ''
+    templateTitle: '',
+    isTrade: false,
   } as IWorking);
+  const { workings, setWorkings } = useContext(RootContext);
 
   const renderTab = () => {
     switch (tabIdx) {
@@ -49,16 +53,23 @@ const WorkingWriteScreen: React.FC<RouteComponentProps> = () => {
           />
         );
       case 1:
-        return <Tab2
-          cafeList={cafeList}
-          setCafeList={setCafeList}
+        return (
+          <Tab2
+            cafeList={cafeList}
+            setCafeList={setCafeList}
+            boardList={boardList}
+            setBoardList={setBoardList}
+            working={working}
+            setWorking={(working: IWorking) => setWorking(working)}
+          />
+        );
+      case 2:
+        return <Tab3 working={working} setWorking={(working: IWorking) => setWorking(working)} />;
+      case 3:
+        return <Tab4
           working={working}
           setWorking={(working: IWorking) => setWorking(working)}
         />;
-      case 2:
-        return <Tab3 />;
-      case 3:
-        return <Tab4 />;
       default:
         return <p>오류</p>;
     }
@@ -72,7 +83,7 @@ const WorkingWriteScreen: React.FC<RouteComponentProps> = () => {
   const nextTab = () => {
     if (tabIdx === 0) {
       if (!working.naverId) {
-        console.log('네이버 아이디를 선택해주세요.');
+        message.warn('네이버 아이디를 먼저 선택해주세요.');
         return;
       }
     }
@@ -81,13 +92,17 @@ const WorkingWriteScreen: React.FC<RouteComponentProps> = () => {
     }
   };
 
-  const save = () => {
-    console.log('세ㅣ븍 ');
+  const save = async () => {
+    const prevWorkings = [...workings];
+    try {
+      await setWorkingsOnDB(workings.concat(working));
+      await setWorkings(workings.concat(working));
+    } catch (e) {
+      message.error(e.message);
+      await setWorkingsOnDB(prevWorkings);
+      await setWorkings(prevWorkings);
+    }
   };
-
-  useEffect(() => {
-    console.log(working, setWorking);
-  }, []);
 
   return (
     <S.ContainerDiv>

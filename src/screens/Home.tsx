@@ -157,7 +157,7 @@ const HomeScreen: React.FunctionComponent = () => {
                 </>
               )}
               locale={{
-                emptyText: '최소 하나의 데이터를 넣어주세요.'
+                emptyText: '데이터가 아직 없습니다.'
               }}
             />
           </S.TableCol>

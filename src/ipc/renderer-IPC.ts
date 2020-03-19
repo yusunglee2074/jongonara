@@ -10,6 +10,10 @@ export const getNaverCafes = async (naverId: string) => {
   return await ipcRenderer.invoke('getNaverCafes', naverId);
 };
 
+export const getCafeBoards = async (naverId: string, cafeUrl: string) => {
+  return await ipcRenderer.invoke('getCafeBoards', naverId, cafeUrl);
+};
+
 export const saveFile = async (filePaths: Array<string>) => {
   return ipcRenderer.invoke('saveFile', filePaths);
 };

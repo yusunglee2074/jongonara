@@ -1,10 +1,12 @@
 import * as React from 'react';
-import { Button, Row, Col, Input } from 'antd';
+import { Button, Row, Col, Input, message } from 'antd';
 import styled from 'styled-components';
-import { useContext, useState } from 'react'
-import { ITemplate, setTemplatesOnDB } from '../../../store/Store'
-import { RootContext } from '../../../context/AppContext'
-import NaverSmartEditor from '../../../components/NaverSmartEditor'
+import { useContext, useState } from 'react';
+import { ITemplate, setTemplatesOnDB } from '../../../store/Store';
+import { RootContext } from '../../../context/AppContext';
+import NaverSmartEditor from '../../../components/NaverSmartEditor';
+import { useEffect } from 'react';
+import { RouteComponentProps } from 'react-router-dom';
 
 const S = {
   ContainerDiv: styled.div`
@@ -22,14 +24,21 @@ const S = {
   `
 };
 
-const NormalTemplateWriteScreen: React.FunctionComponent = () => {
+const NormalTemplateWriteScreen: React.FunctionComponent<RouteComponentProps> = ({ history }) => {
   const [template, setTemplate] = useState({
     type: '일반글',
     tags: '',
     title: '',
     text: ''
   } as ITemplate);
-  const { templates, setTemplates } = useContext(RootContext);
+  const { templates, setTemplates, isNaverLoggedIn } = useContext(RootContext);
+
+  useEffect(() => {
+    if (!isNaverLoggedIn) {
+      message.warning('메인 대쉬보드에서 로그인을 먼저 진행해주세요.');
+      history.push('/home');
+    }
+  }, []);
 
   const save = async () => {
     const iframes = document.getElementsByTagName('iframe');
@@ -48,11 +57,11 @@ const NormalTemplateWriteScreen: React.FunctionComponent = () => {
         setTemplate({ ...template, text: body.innerHTML });
         //TODO:발리데이션, 이미지 추출
         const prevTemplates = [...templates];
-        const found = prevTemplates.find(el => el.title === template.title)
+        const found = prevTemplates.find(el => el.title === template.title);
         if (found) {
-          console.log('이미 존재하는 제목입니다.')
+          console.log('이미 존재하는 제목입니다.');
         } else {
-          const newTemplates = [...templates, { ...template, text: body.innerHTML }]
+          const newTemplates = [...templates, { ...template, text: body.innerHTML }];
           try {
             await setTemplates(newTemplates);
             await setTemplatesOnDB(newTemplates);
@@ -90,7 +99,7 @@ const NormalTemplateWriteScreen: React.FunctionComponent = () => {
       </S.HeaderRow>
       <S.BodyRow>
         <Col span={24}>
-          <NaverSmartEditor/>
+          <NaverSmartEditor />
         </Col>
       </S.BodyRow>
     </S.ContainerDiv>

@@ -1,10 +1,10 @@
 import * as React from 'react';
-import { Button, Row, Col } from 'antd';
+import { Button, Row, Col, message } from 'antd';
 import styled from 'styled-components';
-import { useContext } from 'react';
+import { useContext, useEffect } from 'react';
 import { RootContext } from '../../../context/AppContext';
 import { setWorkingsOnDB } from '../../../store/Store';
-import { Link } from 'react-router-dom';
+import { Link, RouteComponentProps } from 'react-router-dom';
 import WorkingTable from '../../../components/WorkingTable';
 
 const S = {
@@ -17,8 +17,15 @@ const S = {
   `
 };
 
-const WorkingScreen: React.FunctionComponent = () => {
-  const { workings, setWorkings } = useContext(RootContext);
+const WorkingScreen: React.FunctionComponent<RouteComponentProps> = ({ history }) => {
+  const { workings, setWorkings, isNaverLoggedIn } = useContext(RootContext);
+
+  useEffect(() => {
+    if (!isNaverLoggedIn) {
+      message.warning('메인 대쉬보드에서 로그인을 먼저 진행해주세요.');
+      history.push('/home');
+    }
+  }, []);
 
   const deleteTemplate = async (e: any, ...args: Array<any>) => {
     e.preventDefault();

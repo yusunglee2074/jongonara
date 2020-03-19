@@ -2,7 +2,7 @@ import * as React from 'react';
 import { remote } from 'electron';
 import { ChangeEvent, useEffect, useState } from 'react'
 import * as path from 'path';
-import { InputNumber, Col, Row } from 'antd';
+import { InputNumber, Col, Row, Spin } from 'antd'
 import { saveFile } from '../ipc/renderer-IPC'
 
 // @ts-ignore
@@ -11,6 +11,7 @@ const appPath = remote.app.getAppPath();
 
 const NaverSmartEditor: React.FC = () => {
   const [, setWidth] = useState(740);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     const env = remote.process.env.NODE_ENV;
@@ -67,24 +68,6 @@ const NaverSmartEditor: React.FC = () => {
     );
   }, []);
 
-  // const props = {
-  //   name: 'file',
-  //   multiple: true,
-  //   showUploadList: false,
-  //   onChange: async (info: any) => {
-  //     let result;
-  //     console.log(info.file, info.fileList);
-  //     if (info.file) {
-  //     } else if (info.fileList) {
-  //       result = await saveFile(info.fileList.map((el: any) => el.originFileObj));
-  //     }
-  //     message.success(`추가 되었습니다.`);
-  //     for (let i = 0; i < result.length; i++) {
-  //       addImgToEditor(result[i]);
-  //     }
-  //   }
-  // };
-
   const addImgToEditor = (path: string) => {
     postscribe(
       '#afterEditor',
@@ -98,28 +81,36 @@ const NaverSmartEditor: React.FC = () => {
 
   const handleUpload = async (e: ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
+      setLoading(true);
       const filePaths = [];
 
       for (let i = 0; i < e.target.files.length; i++) {
         const file = e.target.files[i];
         filePaths.push(file.path);
       }
-      const result = await saveFile(filePaths);
-      for (let i = 0; i < result.length; i++) {
-        addImgToEditor(result[i]);
+      try {
+        const result = await saveFile(filePaths);
+        for (let i = 0; i < result.length; i++) {
+          addImgToEditor(result[i]);
+        }
+      } catch (e) {
+        if (e.message.indexOf('browsers.imageUpload') > -1) {
+          //TODO: 에러 메시지
+          console.log('메인 대쉬보드에서 로그인을 먼저 진행해주세요.')
+        }
       }
-
+      setLoading(false);
     }
   }
 
   return (
     <>
-      <Row>
-        <Col span={4}>
+      <Spin tip="업로드 중 입니다..." spinning={loading}>
+      <Row style={{ fontSize: 16}}>
+        <Col span={7}>
+          <span>본문에 사진추가</span>
           <input type="file" accept="image/*" multiple onChange={handleUpload} />
-        </Col>
-        <Col span={4}>
-          <span style={{ fontSize: 18 }}>사진 넓이</span>
+          <span>사진 넓이</span>
           <InputNumber
             min={100}
             max={1080}
@@ -132,6 +123,7 @@ const NaverSmartEditor: React.FC = () => {
       <div id={'editor'} />
       <div id={'afterEditor'} />
       <div id={'tester'} />
+      </Spin>
     </>
   );
 };

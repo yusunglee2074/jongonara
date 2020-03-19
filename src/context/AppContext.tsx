@@ -8,12 +8,14 @@ import {
   ILog,
   INaverId,
   ITemplate,
-  IWorking,
-} from '../store/Store'
+  IWorking
+} from '../store/Store';
 
 interface IContextDefaultValue {
   authenticated: boolean;
   setAuthenticated: Function;
+  isNaverLoggedIn: boolean;
+  setIsNaverLoggedIn: Function;
   contextUser: { msg: string; err: object };
   setContextUser: Function;
   naverIds: Array<INaverId>;
@@ -30,7 +32,8 @@ const RootContext = React.createContext({} as IContextDefaultValue);
 
 const RootContextProvider = (props: any) => {
   const [authenticated, setAuthenticated] = useState(false);
-  const [contextUser, setContextUser] = useState({err: {}, msg: '없음'});
+  const [isNaverLoggedIn, setIsNaverLoggedIn] = useState(false);
+  const [contextUser, setContextUser] = useState({ err: {}, msg: '없음' });
   const [naverIds, setNaverIds] = useState([] as Array<INaverId>);
   const [templates, setTemplates] = useState([] as Array<ITemplate>);
   const [workings, setWorkings] = useState([] as Array<IWorking>);
@@ -44,18 +47,30 @@ const RootContextProvider = (props: any) => {
       setTemplates(await getTemplatesOnDB());
       setWorkings(await getWorkingsOnDB());
       setLogs(await getLogsOnDB());
-    }
+    };
 
     (async () => {
       await initDB();
     })();
-
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  useEffect(() => {
+    let isLoggedIn = false;
+    for (let i = 0; i < naverIds.length; i++) {
+      const { connection } = naverIds[i];
+      if (connection === '로그인 성공') {
+        isLoggedIn = true;
+      }
+    }
+    setIsNaverLoggedIn(isLoggedIn);
+  }, [naverIds]);
 
   const value = {
     authenticated,
     setAuthenticated,
+    isNaverLoggedIn,
+    setIsNaverLoggedIn,
     contextUser,
     setContextUser,
     naverIds,

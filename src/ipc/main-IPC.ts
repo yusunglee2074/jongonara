@@ -34,7 +34,7 @@ const mainIPC = async () => {
         const text = puppeteer
           .executablePath()
           .replace('app.asar', 'app.asar.unpacked/node_modules/puppeteer');
-        text.replace('\\dist', '\\node_modules\\puppeteer');
+        return text.replace('\\dist', '\\node_modules\\puppeteer');
       } else {
         const text = puppeteer
           .executablePath()
@@ -56,7 +56,8 @@ const mainIPC = async () => {
         try {
           const browser = await puppeteer.launch({
             ...options,
-            executablePath: getChromiumExecutePath()
+            executablePath: getChromiumExecutePath(),
+            headless: true
           });
           console.log(browser.isConnected(), '브라우저 런칭완료');
           const browserPages = await browser.pages();
@@ -170,6 +171,41 @@ const mainIPC = async () => {
   //   }
   //
   // });
+  ipcMain.handle('getCafeBoards', async (_e: any, naverId: string, cafeUrl: string) => {
+    const getNames = async (page: Page, handler: ElementHandle) => {
+      const imgHandler = await handler.$('img');
+      const aHandler = await handler.$('a');
+      const name = await page.evaluate(el => el.innerText, aHandler);
+      const url = await page.evaluate(el => el.href, aHandler);
+      // 만약 게시판이 링크일 경우
+      if (url.indexOf('ArticleList') === -1) {
+        return {};
+      }
+      const isTradeBoard = await page.evaluate(el => {
+        if (el.className.indexOf('ico-market') > -1) {
+          return true;
+        } else {
+          return false;
+        }
+      }, imgHandler);
+      return { name, url, isTradeBoard };
+    };
+
+    try {
+      const { page } = getLoggedBrowser(naverId);
+      const boardNames: Array<any> = [];
+      await Promise.all([page.waitForNavigation(), page.goto(cafeUrl)]);
+
+      const boardLiElementHandlers = await page.$$('ul.cafe-menu-list li');
+      for (const liHandler of boardLiElementHandlers) {
+        boardNames.push(await getNames(page, liHandler));
+      }
+
+      return boardNames.filter(el => Object.keys(el).length > 0);
+    } catch (e) {
+      throw Error(e);
+    }
+  });
 
   ipcMain.handle('getNaverCafes', async (_e: any, naverId: string) => {
     const getNames = async (page: Page, buttonHandler?: ElementHandle) => {

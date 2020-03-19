@@ -5,7 +5,7 @@ import TemplateTable from '../../../components/TemplateTable';
 import { useContext } from 'react';
 import { RootContext } from '../../../context/AppContext';
 import { setTemplatesOnDB } from '../../../store/Store';
-import { Link } from 'react-router-dom'
+import { Link } from 'react-router-dom';
 
 const S = {
   ContainerDiv: styled.div`

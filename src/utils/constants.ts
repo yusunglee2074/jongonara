@@ -44,12 +44,7 @@ export const HOME_SCREEN_TEMPLATE_TABLE_COL: Array<object> = [
 
 export const HOME_SCREEN_WORKING_TABLE_COL: Array<object> = [
   {
-    title: '번호',
-    dataIndex: 'idx',
-    key: 'idx'
-  },
-  {
-    title: '네이버 아이디',
+    title: '작성자 아이디',
     dataIndex: 'naverId',
     key: 'naverId'
   },
@@ -59,15 +54,32 @@ export const HOME_SCREEN_WORKING_TABLE_COL: Array<object> = [
     key: 'cafeName'
   },
   {
-    title: '게시판 이름',
-    dataIndex: 'boardName',
-    key: 'boardName'
+    title: '게시판 목록',
+    dataIndex: 'boardNames',
+    key: 'boardNames',
+    render: (_: any, record: any) => {
+      return record.boardNames.map((el:any) => el.name).join(', ')
+    }
   },
   {
     title: '템플릿 제목',
-    dataIndex: 'templateName',
-    key: 'templateName'
-  }
+    dataIndex: 'templateTitle',
+    key: 'templateTitle'
+  },
+  {
+    title: '글 작성 간격(분)',
+    dataIndex: 'minPerWrite',
+    key: 'minPerWrite'
+  },
+  {
+    title: '중복방지 기능',
+    dataIndex: 'checkFourBoards',
+    key: 'checkFourBoards',
+    render: (_: any, record: any) => {
+      return record.checkFourBoards ? '작동' : '미작동'
+    }
+  },
+
 ];
 
 export const HOME_SCREEN_LOG_TABLE_COL: Array<object> = [

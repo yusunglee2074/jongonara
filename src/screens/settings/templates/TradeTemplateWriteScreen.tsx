@@ -1,12 +1,13 @@
 import * as React from 'react';
-import { Button, Row, Col, Input, Checkbox, InputNumber } from 'antd';
+import { Button, Row, Col, Input, Checkbox, InputNumber, message } from 'antd';
 import styled from 'styled-components';
 import { useContext } from 'react';
 import { useState } from 'react';
 import { ITemplate, setTemplatesOnDB } from '../../../store/Store';
 import { RootContext } from '../../../context/AppContext';
 import NaverSmartEditor from '../../../components/NaverSmartEditor';
-import { RouteComponentProps, withRouter } from 'react-router-dom'
+import { RouteComponentProps, withRouter } from 'react-router-dom';
+import { useEffect } from 'react';
 
 const S = {
   ContainerDiv: styled.div`
@@ -32,7 +33,14 @@ const TradeTemplateWriteScreen: React.FC<RouteComponentProps> = ({ history }) =>
     title: '',
     text: ''
   } as ITemplate);
-  const { templates, setTemplates } = useContext(RootContext);
+  const { templates, setTemplates, isNaverLoggedIn } = useContext(RootContext);
+
+  useEffect(() => {
+    if (!isNaverLoggedIn) {
+      message.warning('메인 대쉬보드에서 로그인을 먼저 진행해주세요.');
+      history.push('/home');
+    }
+  }, []);
 
   const save = async () => {
     const iframes = document.getElementsByTagName('iframe');
@@ -58,7 +66,7 @@ const TradeTemplateWriteScreen: React.FC<RouteComponentProps> = ({ history }) =>
             const newTemplates = [...templates, { ...template, text: body.innerText }];
             await setTemplates(newTemplates);
             await setTemplatesOnDB(newTemplates);
-            history.push('/home')
+            history.push('/home');
           }
         } catch (e) {
           console.log('에러', e);

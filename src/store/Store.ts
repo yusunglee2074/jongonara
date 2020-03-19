@@ -26,8 +26,9 @@ export interface IWorking {
   naverId: string;
   cafeName: string;
   cafeUrl: string;
-  boardNames: Array<string>;
+  boardNames: Array<any>;
   templateTitle: string;
+  isTrade: boolean;
 }
 
 export interface ILog {
