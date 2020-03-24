@@ -1,9 +1,9 @@
 import * as React from 'react';
 import { remote } from 'electron';
-import { ChangeEvent, useEffect, useState } from 'react'
+import { ChangeEvent, useEffect, useState } from 'react';
 import * as path from 'path';
-import { InputNumber, Col, Row, Spin } from 'antd'
-import { saveFile } from '../ipc/renderer-IPC'
+import { InputNumber, Col, Row, Spin } from 'antd';
+import { saveFile } from '../ipc/renderer-IPC';
 
 // @ts-ignore
 const postscribe = require('postscribe');
@@ -18,8 +18,15 @@ const NaverSmartEditor: React.FC = () => {
     let HuskyEZCreator;
     let SkinUrl;
     if (env === 'development') {
-      HuskyEZCreator = path.resolve('/', 'public', 'NSE2', 'js', 'service', 'HuskyEZCreator.js');
-      SkinUrl = path.resolve('/', 'public', 'NSE2', 'SmartEditor2Skin.html');
+      const isWin = remote.process.platform === 'win32';
+      if (isWin) {
+        HuskyEZCreator = path.join('/', 'public', 'NSE2', 'js', 'service', 'HuskyEZCreator.js');
+        SkinUrl = path.join('/', 'public', 'NSE2', 'SmartEditor2Skin.html');
+        console.log(HuskyEZCreator, SkinUrl);
+      } else {
+        HuskyEZCreator = path.resolve('/', 'public', 'NSE2', 'js', 'service', 'HuskyEZCreator.js');
+        SkinUrl = path.resolve('/', 'public', 'NSE2', 'SmartEditor2Skin.html');
+      }
     } else {
       HuskyEZCreator = path.resolve(
         appPath,
@@ -41,16 +48,13 @@ const NaverSmartEditor: React.FC = () => {
         'NSE2',
         'SmartEditor2Skin.html'
       );
-      const isWin = remote.process.platform === 'win32';
-      if (isWin) {
-        SkinUrl = SkinUrl.replace(/\\/g, '/');
-      }
     }
     postscribe('#loadEditor', '<script src="' + HuskyEZCreator + '" charset="utf-8"></script>');
     postscribe(
       '#editor',
       '<div>' + '<textarea name="ir1" id="ir1" rows="10" cols="60"/>' + '</div>'
     );
+    SkinUrl = SkinUrl.replace(/\\/g, '/');
     postscribe(
       '#afterEditor',
       '<script type="text/javascript">' +
@@ -96,33 +100,33 @@ const NaverSmartEditor: React.FC = () => {
       } catch (e) {
         if (e.message.indexOf('browsers.imageUpload') > -1) {
           //TODO: 에러 메시지
-          console.log('메인 대쉬보드에서 로그인을 먼저 진행해주세요.')
+          console.log('메인 대쉬보드에서 로그인을 먼저 진행해주세요.');
         }
       }
       setLoading(false);
     }
-  }
+  };
 
   return (
     <>
       <Spin tip="업로드 중 입니다..." spinning={loading}>
-      <Row style={{ fontSize: 16}}>
-        <Col span={7}>
-          <span>본문에 사진추가</span>
-          <input type="file" accept="image/*" multiple onChange={handleUpload} />
-          <span>사진 넓이</span>
-          <InputNumber
-            min={100}
-            max={1080}
-            defaultValue={740}
-            onChange={(e: any) => setWidth(e.target.value)}
-          />
-        </Col>
-      </Row>
-      <div id={'loadEditor'} />
-      <div id={'editor'} />
-      <div id={'afterEditor'} />
-      <div id={'tester'} />
+        <Row style={{ fontSize: 16 }}>
+          <Col span={7}>
+            <span>본문에 사진추가</span>
+            <input type="file" accept="image/*" multiple onChange={handleUpload} />
+            <span>사진 넓이</span>
+            <InputNumber
+              min={100}
+              max={1080}
+              defaultValue={740}
+              onChange={(e: any) => setWidth(e.target.value)}
+            />
+          </Col>
+        </Row>
+        <div id={'loadEditor'} />
+        <div id={'editor'} />
+        <div id={'afterEditor'} />
+        <div id={'tester'} />
       </Spin>
     </>
   );
