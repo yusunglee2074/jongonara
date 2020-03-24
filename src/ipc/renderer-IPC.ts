@@ -1,4 +1,4 @@
-import { INaverId } from '../store/Store';
+import { INaverId, ISetting, ITemplate, IWorking } from '../store/Store'
 import { ipcRenderer } from 'electron';
 import { format } from 'date-fns';
 
@@ -17,28 +17,20 @@ export const getCafeBoards = async (naverId: string, cafeUrl: string) => {
 export const saveFile = async (filePaths: Array<string>) => {
   return ipcRenderer.invoke('saveFile', filePaths);
 };
-// export const saveFile = async (files: Array<File>) => {
-//   async function readFile(file: File): Promise<any> {
-//     return await new Promise(resolve => {
-//       let fileReader = new FileReader();
-//       fileReader.onload = () => {
-//         if (fileReader.result) {
-//           resolve(Buffer.from(fileReader.result));
-//         }
-//       };
-//       fileReader.readAsArrayBuffer(file);
-//     });
-//   }
-//
-//   const bufferFiles: Array<any> = [];
-//   for (const file of files) {
-//     bufferFiles.push({
-//       fileName: format(new Date(), 'yyyyMMddssSSS'),
-//       buffer: await readFile(file)
-//     });
-//   }
-//   return ipcRenderer.invoke('saveFile', bufferFiles);
-// };
+
+export const run = async (workings: Array<IWorking>, templates: Array<ITemplate>, setting: ISetting) => {
+  ipcRenderer.on('logs', async (_e, ...args) => {
+    console.log(args, '로그 듣기');
+  });
+  return ipcRenderer.invoke('run', workings, templates, setting);
+};
+
+export const stop = async () => {
+  await ipcRenderer.invoke('stop');
+  ipcRenderer.removeListener('logs', (...args) => {
+    console.log(args, '끝')
+  });
+};
 
 export const saveFiles = async (blobArr: Array<Blob>) => {
   const promiseArr: Array<Promise<any>> = [];

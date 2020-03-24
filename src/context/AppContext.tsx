@@ -3,10 +3,13 @@ import { useEffect, useState } from 'react';
 import {
   getLogsOnDB,
   getNaverIdsOnDB,
+  getSettingsOnDB,
   getTemplatesOnDB,
   getWorkingsOnDB,
   ILog,
   INaverId,
+  IRunTimes,
+  ISetting,
   ITemplate,
   IWorking
 } from '../store/Store';
@@ -26,6 +29,19 @@ interface IContextDefaultValue {
   setWorkings: Function;
   logs: Array<ILog>;
   setLogs: Function;
+  setting: ISetting;
+  setSetting: Function;
+  runningStatus: IRunning;
+  setRunningStatus: Function;
+}
+
+export enum RunningStatus {
+  Stop = '정지',
+  Running = '작동중'
+}
+
+export interface IRunning {
+  status: RunningStatus;
 }
 
 const RootContext = React.createContext({} as IContextDefaultValue);
@@ -38,6 +54,8 @@ const RootContextProvider = (props: any) => {
   const [templates, setTemplates] = useState([] as Array<ITemplate>);
   const [workings, setWorkings] = useState([] as Array<IWorking>);
   const [logs, setLogs] = useState([] as Array<ILog>);
+  const [setting, setSetting] = useState({ runTimes: {} as IRunTimes } as ISetting);
+  const [runningStatus, setRunningStatus] = useState({ status: RunningStatus.Stop } as IRunning);
 
   useEffect(() => {
     // 애플리케이션 시작시, 기타 초기화 루틴도 적용 예정, 시작시 단 한번만 실행
@@ -47,6 +65,7 @@ const RootContextProvider = (props: any) => {
       setTemplates(await getTemplatesOnDB());
       setWorkings(await getWorkingsOnDB());
       setLogs(await getLogsOnDB());
+      setSetting(await getSettingsOnDB());
     };
 
     (async () => {
@@ -80,7 +99,11 @@ const RootContextProvider = (props: any) => {
     workings,
     setWorkings,
     logs,
-    setLogs
+    setLogs,
+    setting,
+    setSetting,
+    runningStatus,
+    setRunningStatus
   };
 
   return <RootContext.Provider value={value}>{props.children}</RootContext.Provider>;

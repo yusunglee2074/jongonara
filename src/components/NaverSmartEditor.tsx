@@ -10,7 +10,7 @@ const postscribe = require('postscribe');
 const appPath = remote.app.getAppPath();
 
 const NaverSmartEditor: React.FC = () => {
-  const [, setWidth] = useState(740);
+  const [width, setWidth] = useState(740);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -68,12 +68,12 @@ const NaverSmartEditor: React.FC = () => {
     );
   }, []);
 
-  const addImgToEditor = (path: string) => {
+  const addImgToEditor = (path: string, width: number) => {
     postscribe(
       '#afterEditor',
       `
       <script type="text/javascript">
-      addImg("${path}");
+      addImg("${path}", ${width});
       </script>
       `
     );
@@ -91,7 +91,7 @@ const NaverSmartEditor: React.FC = () => {
       try {
         const result = await saveFile(filePaths);
         for (let i = 0; i < result.length; i++) {
-          addImgToEditor(result[i]);
+          addImgToEditor(result[i], width);
         }
       } catch (e) {
         if (e.message.indexOf('browsers.imageUpload') > -1) {

@@ -2,13 +2,14 @@ import * as React from 'react';
 import { Col, Row, Button, message } from 'antd';
 import styled from 'styled-components';
 import { RouteComponentProps, withRouter } from 'react-router-dom';
-import { useContext, useState } from 'react'
+import { useContext, useState } from 'react';
 import Tab1 from './Tab1';
 import Tab3 from './Tab3';
 import Tab2 from './Tab2';
 import Tab4 from './Tab4';
-import { IWorking, setWorkingsOnDB } from '../../../store/Store'
-import { RootContext } from '../../../context/AppContext'
+import { IWorking, setWorkingsOnDB } from '../../../store/Store';
+import { RootContext } from '../../../context/AppContext';
+import { format } from 'date-fns';
 
 const S = {
   ContainerDiv: styled.div`
@@ -40,6 +41,7 @@ const WorkingWriteScreen: React.FC<RouteComponentProps> = () => {
     boardNames: [],
     templateTitle: '',
     isTrade: false,
+    shouldRun: false,
   } as IWorking);
   const { workings, setWorkings } = useContext(RootContext);
 
@@ -66,10 +68,7 @@ const WorkingWriteScreen: React.FC<RouteComponentProps> = () => {
       case 2:
         return <Tab3 working={working} setWorking={(working: IWorking) => setWorking(working)} />;
       case 3:
-        return <Tab4
-          working={working}
-          setWorking={(working: IWorking) => setWorking(working)}
-        />;
+        return <Tab4 working={working} setWorking={(working: IWorking) => setWorking(working)} />;
       default:
         return <p>오류</p>;
     }
@@ -95,8 +94,9 @@ const WorkingWriteScreen: React.FC<RouteComponentProps> = () => {
   const save = async () => {
     const prevWorkings = [...workings];
     try {
-      await setWorkingsOnDB(workings.concat(working));
-      await setWorkings(workings.concat(working));
+      const workingId = format(new Date(), 'yyyyMMddssSSS');
+      await setWorkingsOnDB(workings.concat({ ...working, workingId }));
+      await setWorkings(workings.concat({ ...working, workingId }));
     } catch (e) {
       message.error(e.message);
       await setWorkingsOnDB(prevWorkings);

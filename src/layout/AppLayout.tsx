@@ -15,7 +15,7 @@ import WorkingWriteScreen from '../screens/settings/workings/WorkingWriteScreen'
 const { Sider } = Layout;
 
 const sideMenuArr = [
-  { text: '메인 대시보드', iconType: 'home', goto: '/' },
+  { text: '메인 대시보드', iconType: 'home', goto: '/home' },
   { text: '네이버 아이디 설정', iconType: 'user', goto: '/setting-naver-id' },
   { text: '작성 글 템플릿 설정', iconType: 'file-text', goto: '/setting-template' },
   { text: '작업 설정', iconType: 'play-circle', goto: '/setting-working' },
@@ -37,7 +37,7 @@ const AppLayout: React.FunctionComponent<RouteComponentProps> = ({ location }) =
         <Menu
           theme="dark"
           selectedKeys={[location.pathname]}
-          defaultSelectedKeys={['/']}
+          defaultSelectedKeys={['/home']}
           mode="inline"
         >
           {sideMenuArr.map(item =>

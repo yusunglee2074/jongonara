@@ -1,13 +1,10 @@
 import * as puppeteer from 'puppeteer';
 import { Browser, ElementHandle, Page } from 'puppeteer';
-// import { app } from 'electron';
 import { PUPPETEER_BROWSER_OPTIONS_ARGS } from '../utils/constants';
 import { ipcMain } from 'electron';
-import { INaverId } from '../store/Store';
+import { ILog, INaverId, ISetting, ITemplate, IWorking } from '../store/Store';
 import errorCodes from '../utils/errorCodes';
-// import * as path from 'path'
-// import { format } from 'date-fns';
-// import * as fs from 'fs'
+import { win } from '../main';
 
 const env = process.env.NODE_ENV;
 
@@ -121,7 +118,15 @@ const mainIPC = async () => {
             loginFailIds.push(id);
             browser.close();
           } else {
-            browsers = { ...browsers, [id]: { page, browser, id, password } };
+            browsers = {
+              ...browsers,
+              [id]: { page, browser, id, password } as {
+                page: Page;
+                id: string;
+                password: string;
+                browser: Browser;
+              }
+            };
           }
         });
 
@@ -147,30 +152,6 @@ const mainIPC = async () => {
       throw Error(e);
     }
   });
-  // ipcMain.handle('saveFile', async (_e: any, bufferFiles: Array<any>) => {
-  //
-  //   const removeTempLocalFiles = (paths: Array<string>) => {
-  //     for (const path of paths) {
-  //       fs.unlinkSync(path);
-  //     }
-  //   }
-  //
-  //   const tempLocalFilePaths = [];
-  //   for (const file of bufferFiles) {
-  //     const tempPath = path.resolve(app.getAppPath(), '..', file.fileName);
-  //     fs.writeFileSync(tempPath, file.buffer);
-  //     tempLocalFilePaths.push(tempPath);
-  //   }
-  //   try {
-  //     const result = await uploadPhotoOnCafe(tempLocalFilePaths);
-  //     removeTempLocalFiles(tempLocalFilePaths);
-  //     return result;
-  //   } catch (e) {
-  //     removeTempLocalFiles(tempLocalFilePaths);
-  //     throw Error(e);
-  //   }
-  //
-  // });
   ipcMain.handle('getCafeBoards', async (_e: any, naverId: string, cafeUrl: string) => {
     const getNames = async (page: Page, handler: ElementHandle) => {
       const imgHandler = await handler.$('img');
@@ -182,11 +163,7 @@ const mainIPC = async () => {
         return {};
       }
       const isTradeBoard = await page.evaluate(el => {
-        if (el.className.indexOf('ico-market') > -1) {
-          return true;
-        } else {
-          return false;
-        }
+        return el.className.indexOf('ico-market') > -1;
       }, imgHandler);
       return { name, url, isTradeBoard };
     };
@@ -206,6 +183,81 @@ const mainIPC = async () => {
       throw Error(e);
     }
   });
+
+  ipcMain.handle(
+    'run',
+    async (_: any, workings: Array<IWorking>, templates: Array<ITemplate>, setting: ISetting) => {
+      console.log(workings, templates, setting);
+
+      const sendLogToRenderer = (log: ILog) => {
+        // createdAt: string;
+        // naverId: string;
+        // type: string;
+        // text: string;
+        // workingId: string;
+        win?.webContents.send('logs', { ...log, createdAt: new Date() });
+      };
+
+      const write = async (naverId: string, working: IWorking) => {
+        sendLogToRenderer({ text: '작업을 준비 중 입니다.', type: '정보' });
+        const [template] = templates.filter(el => el.title === working.templateTitle);
+
+        for (let i = 0; i < working.boardNames.length; i++) {
+          const { name, url, isTradeBoard } = working.boardNames[i];
+
+          const { page }: { page: Page } = browsers[naverId];
+          await page.goto(url);
+          page.on('dialog', async dialog => {
+            console.log(dialog.message());
+            await dialog.dismiss();
+            // 글쓰기 버튼 클릭
+            const writeButtonHandler = await page.waitForSelector('.cafe-write-btn a', {
+              visible: true
+            });
+            await writeButtonHandler?.click();
+
+            await page.waitForSelector('iframe');
+            const iframeHandler = await page.$('div#main-area iframe');
+            const frame = await iframeHandler?.contentFrame();
+            if (!frame) throw Error('에러발생');
+            const titleInputHandler = await frame.$('input#subject');
+            await frame.evaluate(el => (el.value = template.title), titleInputHandler);
+
+            if (isTradeBoard) {
+              const saleBtnHandler = await frame.$('button#sale_direct');
+              saleBtnHandler?.click();
+
+              const nPayBtnHandler = await frame.$('#inputSwitch');
+              nPayBtnHandler?.click();
+
+              const saleCostInputHandler = await frame.$('#sale_cost');
+              await frame.evaluate(el => (el.value = template.price), saleCostInputHandler);
+
+              if (!template.exposePhoneNumber) {
+                const exposeNumInputHandler = await frame.$('#sale_open_phone');
+                exposeNumInputHandler?.click();
+                if (template.useTempPhoneNumber) {
+                  const useTempNumInputHandler = await frame.$('#sale_otn_use');
+                  useTempNumInputHandler?.click();
+                }
+              }
+            }
+
+            console.log(name);
+            // const getFirstImgOnContent = (templateText: string) => {
+            //   // "<p><img width="740" src="https://cafefiles.pstatic.net/MjAyMDAzMjRfMzQg/MDAxNTg1MDMyNTA4MjI0.U0w9y3s8hXl5DzV6PappeRPtWUvMuH9wv4iYLcGdj_gg.XYMZAhuUMCagTc4X2yw38hNCH3EX43RuPioMvNDvCqog.JPEG/6517390_1.jpg">'<br></p><p><br></p><p><br></p><p>이렇게저렇게<img width="740" src="https://cafefiles.pstatic.net/MjAyMDAzMjRfOSAg/MDAxNTg1MDMyNTE5OTc2.EfhKOvARdUqyhl9a3gkmqkYEBugh_3C4eTsoiFwJ49Eg.k0GjgsAC7klxf7zmADXRi2EtxwH6Cs_qNqeCbSIGDxkg.JPEG/1405537904_1351563850_C0%CC%B7FBC2F7C5EBB0E802_%281%29.jpg"><img width="..."
+            // };
+          });
+        }
+      };
+
+      console.log(write);
+
+      // 현재 시간이 시간내인지 확인
+      // const { runTimes } = setting;
+      // setInterval();
+    }
+  );
 
   ipcMain.handle('getNaverCafes', async (_e: any, naverId: string) => {
     const getNames = async (page: Page, buttonHandler?: ElementHandle) => {

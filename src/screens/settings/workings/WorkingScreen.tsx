@@ -3,7 +3,7 @@ import { Button, Row, Col, message } from 'antd';
 import styled from 'styled-components';
 import { useContext, useEffect } from 'react';
 import { RootContext } from '../../../context/AppContext';
-import { setWorkingsOnDB } from '../../../store/Store';
+import { setWorkingsOnDB } from '../../../store/Store'
 import { Link, RouteComponentProps } from 'react-router-dom';
 import WorkingTable from '../../../components/WorkingTable';
 
@@ -27,7 +27,7 @@ const WorkingScreen: React.FunctionComponent<RouteComponentProps> = ({ history }
     }
   }, []);
 
-  const deleteTemplate = async (e: any, ...args: Array<any>) => {
+  const deleteWorking = async (e: any, ...args: Array<any>) => {
     e.preventDefault();
     const [, record] = args;
     const { workingId } = record;
@@ -61,7 +61,7 @@ const WorkingScreen: React.FunctionComponent<RouteComponentProps> = ({ history }
             dataIndex: 'delete',
             key: 'delete',
             render: (text: any, record: any, index: any) => (
-              <Button onClick={e => deleteTemplate(e, text, record, index)}>삭제</Button>
+              <Button onClick={e => deleteWorking(e, text, record, index)}>삭제</Button>
             )
           }
         ]}

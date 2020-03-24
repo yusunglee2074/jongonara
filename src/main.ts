@@ -5,7 +5,7 @@ import mainIPC from './ipc/main-IPC';
 
 // const serviceAccount = require("../jongonara-10b67-firebase-adminsdk-nevug-5bdda1479f.json");
 
-let win: BrowserWindow | null;
+export let win: BrowserWindow | null;
 
 const installExtensions = async () => {
   const installer = require('electron-devtools-installer');

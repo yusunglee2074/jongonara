@@ -63,14 +63,14 @@ const TradeTemplateWriteScreen: React.FC<RouteComponentProps> = ({ history }) =>
           if (found) {
             console.log('이미 존재하는 제목입니다.');
           } else {
-            const newTemplates = [...templates, { ...template, text: body.innerText }];
-            await setTemplates(newTemplates);
+            const newTemplates = [...templates, { ...template, text: body.innerHTML }];
+            setTemplates(newTemplates);
             await setTemplatesOnDB(newTemplates);
             history.push('/home');
           }
         } catch (e) {
           console.log('에러', e);
-          await setTemplates(templates);
+          setTemplates(templates);
           await setTemplatesOnDB(templates);
         }
       }
