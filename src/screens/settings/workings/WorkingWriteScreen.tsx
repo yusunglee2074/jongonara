@@ -33,7 +33,6 @@ const WorkingWriteScreen: React.FC<RouteComponentProps> = () => {
   const [boardList, setBoardList] = useState([]);
   const [working, setWorking] = useState({
     workingId: '',
-    minPerWrite: 5,
     checkFourBoards: true,
     naverId: '',
     cafeName: '',
