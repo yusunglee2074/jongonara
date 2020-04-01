@@ -57,8 +57,7 @@
       "package.json"
     ],
     "linux": {
-      "target": "deb",
-      "publish": {}
+      "target": "deb"
     },
     "mac": {
       "category": "public.app-category.developer-tools",
