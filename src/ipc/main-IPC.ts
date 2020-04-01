@@ -1,10 +1,17 @@
 import * as puppeteer from 'puppeteer';
 import { Browser, ElementHandle, Page } from 'puppeteer';
 import { PUPPETEER_BROWSER_OPTIONS_ARGS } from '../utils/constants';
-import { ipcMain } from 'electron';
+import { app, ipcMain } from 'electron';
 import { ILog, INaverId, ISetting, ITemplate, IWorking } from '../store/Store';
 import errorCodes from '../utils/errorCodes';
 import { win } from '../main';
+import * as fs from 'fs';
+import * as util from 'util';
+import * as stream from 'stream';
+import axios from 'axios';
+
+import { Job, scheduleJob } from 'node-schedule';
+import { autoUpdater } from 'electron-updater'
 
 const env = process.env.NODE_ENV;
 
@@ -46,19 +53,31 @@ const mainIPC = async () => {
     ignoreHTTPSErrors: true
   };
 
+  ipcMain.handle('getVersion', (_e: any) => {
+    return app.getVersion();
+  })
+
+  ipcMain.handle('restartApp', (_e: any) => {
+    autoUpdater.quitAndInstall();
+  })
+
   ipcMain.handle(
     'loginNaver',
-    async (_e: any, naverIds: Array<INaverId>): Promise<any> => {
+    async (_e: any, naverIds: Array<INaverId>, isDebugMode: boolean): Promise<any> => {
       const createPage = async (naverId: string, password: string) => {
         try {
           const browser = await puppeteer.launch({
             ...options,
             executablePath: getChromiumExecutePath(),
-            headless: true
+            headless: !isDebugMode
           });
           console.log(browser.isConnected(), '브라우저 런칭완료');
           const browserPages = await browser.pages();
           const page = browserPages[0];
+          page.on('error', msg => {
+            console.log(msg);
+            throw msg;
+          });
           await page.goto('https://nid.naver.com/nidlogin.login');
           await page.waitForSelector('input[id="id"]');
           await page.waitFor(200);
@@ -183,79 +202,199 @@ const mainIPC = async () => {
       throw Error(e);
     }
   });
+  const sendLogToRenderer = (log: ILog) => {
+    win?.webContents.send('logs', { ...log, createdAt: new Date() });
+  };
 
+  const jobs: Array<Job> = [];
+  ipcMain.handle('stop', async (_: any) => {
+    for (let i = 0; i < jobs.length; i++) {
+      const job = jobs[i];
+      job.cancel();
+    }
+    sendLogToRenderer({ type: '로그', text: '모든 작업을 종료합니다.' });
+  });
   ipcMain.handle(
     'run',
     async (_: any, workings: Array<IWorking>, templates: Array<ITemplate>, setting: ISetting) => {
-      console.log(workings, templates, setting);
+      // createdAt: string;
+      // naverId: string;
+      // type: string;
+      // text: string;
+      // workingId: string;
 
-      const sendLogToRenderer = (log: ILog) => {
-        // createdAt: string;
-        // naverId: string;
-        // type: string;
-        // text: string;
-        // workingId: string;
-        win?.webContents.send('logs', { ...log, createdAt: new Date() });
-      };
+      const write = async (working: IWorking) => {
+        const getFirstImgOnContent = async (templateText: string) => {
+          let firstImgUrl = templateText;
+          firstImgUrl = firstImgUrl.slice(firstImgUrl.indexOf('img-attachment'));
+          firstImgUrl = firstImgUrl.slice(firstImgUrl.indexOf('src="') + 5);
+          firstImgUrl = firstImgUrl.slice(0, firstImgUrl.indexOf('"'));
+          console.log(firstImgUrl, '퍼스트 이미지 url');
 
-      const write = async (naverId: string, working: IWorking) => {
-        sendLogToRenderer({ text: '작업을 준비 중 입니다.', type: '정보' });
+          const fileTypeCharArr = [];
+
+          for (let i = firstImgUrl.length - 1; i > 0; i--) {
+            const char = firstImgUrl[i];
+            if (char === '.') break;
+            fileTypeCharArr.unshift([char]);
+          }
+
+          const fileType = fileTypeCharArr.join('');
+          const res = await axios.get(firstImgUrl, { responseType: 'stream' });
+          const filepath = app.getAppPath() + '/temp.' + (fileType.length < 3 ? 'jpg' : fileType);
+          const writeStream = fs.createWriteStream(filepath);
+          try {
+            const pipeline = util.promisify(stream.pipeline);
+            await pipeline(res.data, writeStream);
+            return filepath;
+          } catch (e) {
+            console.log('에러', e);
+            throw e;
+          }
+        };
+        sendLogToRenderer({
+          text: '글 작성을 시도합니다.',
+          cafeName: working.cafeName,
+          type: '로그',
+          workingId: working.workingId,
+          naverId: working.naverId
+        });
         const [template] = templates.filter(el => el.title === working.templateTitle);
-
         for (let i = 0; i < working.boardNames.length; i++) {
-          const { name, url, isTradeBoard } = working.boardNames[i];
+          const { url, isTradeBoard } = working.boardNames[i];
+          const { page, browser }: { page: Page; browser: Browser } = browsers[working.naverId];
 
-          const { page }: { page: Page } = browsers[naverId];
+          console.log(i, '글 쓰러 이동합니다.', page.url());
           await page.goto(url);
           page.on('dialog', async dialog => {
-            console.log(dialog.message());
-            await dialog.dismiss();
-            // 글쓰기 버튼 클릭
-            const writeButtonHandler = await page.waitForSelector('.cafe-write-btn a', {
-              visible: true
+            await dialog.accept();
+          });
+          // 글쓰기 버튼 클릭
+          await page.waitForSelector('iframe');
+          const boardIframeHandler = await page.$('iframe#cafe_main');
+          const boardIframe = await boardIframeHandler?.contentFrame();
+          if (!boardIframe) throw Error('에러발생');
+          const writeButtonHandler = await boardIframe.waitForSelector('a#writeFormBtn', {
+            visible: true
+          });
+          await writeButtonHandler?.click();
+
+          await Promise.all([page.waitForSelector('iframe'), waitForNetworkIdle(page, 500, 0)]);
+
+          // 글쓰기 권한 없는 게시판 아릶
+          const isWritePermissionScreen = await boardIframe.$('tit_level');
+          if (!isWritePermissionScreen) {
+            sendLogToRenderer({
+              type: '에러',
+              text: '권한이 없는 게시판이 포함되어있습니다.',
+              cafeName: working.cafeName,
+              workingId: working.workingId,
+              naverId: working.naverId
             });
-            await writeButtonHandler?.click();
+            return;
+          }
 
-            await page.waitForSelector('iframe');
-            const iframeHandler = await page.$('div#main-area iframe');
-            const frame = await iframeHandler?.contentFrame();
-            if (!frame) throw Error('에러발생');
-            const titleInputHandler = await frame.$('input#subject');
-            await frame.evaluate(el => (el.value = template.title), titleInputHandler);
+          const iframeHandler = await page.$('div#main-area iframe');
+          const frame = await iframeHandler?.contentFrame();
+          if (!frame) throw Error('에러발생');
+          const titleInputHandler = await frame.waitForSelector('input#subject');
+          await frame.evaluate(
+            (el, title) => (el.value = title),
+            titleInputHandler,
+            template.title
+          );
 
-            if (isTradeBoard) {
-              const saleBtnHandler = await frame.$('button#sale_direct');
-              saleBtnHandler?.click();
+          if (isTradeBoard) {
+            // 거래글
+            // 본인인증이 완료되어있는지 확인
+            // TODO: 본인인증 화면 나오면 제끼는 함수 필요함, 그리고 글 갯수 먼저 확인, 4개 초과면 삭제후 돌입
+            const saleBtnHandler = await frame.waitForSelector('button#sale_direct');
+            await saleBtnHandler?.click();
 
-              const nPayBtnHandler = await frame.$('#inputSwitch');
-              nPayBtnHandler?.click();
+            const nPayBtnHandler = await frame.waitForSelector('.toggle_switch');
+            await nPayBtnHandler?.click();
 
-              const saleCostInputHandler = await frame.$('#sale_cost');
-              await frame.evaluate(el => (el.value = template.price), saleCostInputHandler);
+            await frame.focus('#sale_cost');
+            const price =
+              template.price && template.price > 2000 ? template.price.toString() : '2000';
+            await page.keyboard.type(price);
 
-              if (!template.exposePhoneNumber) {
-                const exposeNumInputHandler = await frame.$('#sale_open_phone');
-                exposeNumInputHandler?.click();
-                if (template.useTempPhoneNumber) {
-                  const useTempNumInputHandler = await frame.$('#sale_otn_use');
-                  useTempNumInputHandler?.click();
-                }
+            if (!template.exposePhoneNumber) {
+              const exposeNumInputHandler = await frame.$('#sale_open_phone');
+              exposeNumInputHandler?.click();
+              if (template.useTempPhoneNumber) {
+                const useTempNumInputHandler = await frame.$('#sale_otn_use');
+                useTempNumInputHandler?.click();
               }
             }
+            const firstImgPath = await getFirstImgOnContent(template.text);
+            await page.waitFor(5000);
+            await uploadPhotoOnCafe([firstImgPath], page, browser);
+          } else {
+            // 일반글
+          }
+          const writeIframeHandler = await boardIframe.$('td.read iframe');
+          const writeIframe = await writeIframeHandler?.contentFrame();
+          if (!writeIframe) throw Error('에러발생');
+          const bodyHandler = await writeIframe.$('body');
 
-            console.log(name);
-            // const getFirstImgOnContent = (templateText: string) => {
-            //   // "<p><img width="740" src="https://cafefiles.pstatic.net/MjAyMDAzMjRfMzQg/MDAxNTg1MDMyNTA4MjI0.U0w9y3s8hXl5DzV6PappeRPtWUvMuH9wv4iYLcGdj_gg.XYMZAhuUMCagTc4X2yw38hNCH3EX43RuPioMvNDvCqog.JPEG/6517390_1.jpg">'<br></p><p><br></p><p><br></p><p>이렇게저렇게<img width="740" src="https://cafefiles.pstatic.net/MjAyMDAzMjRfOSAg/MDAxNTg1MDMyNTE5OTc2.EfhKOvARdUqyhl9a3gkmqkYEBugh_3C4eTsoiFwJ49Eg.k0GjgsAC7klxf7zmADXRi2EtxwH6Cs_qNqeCbSIGDxkg.JPEG/1405537904_1351563850_C0%CC%B7FBC2F7C5EBB0E802_%281%29.jpg"><img width="..."
-            // };
+          const removeFirstImgTag = (text: string) => {
+            const startIdxImgTag = text.indexOf('<img');
+            const endIdxImgTag = text.slice(startIdxImgTag).indexOf('>');
+            return text.slice(0, startIdxImgTag) + text.slice(endIdxImgTag + 1, text.length - 1);
+          };
+          const text = isTradeBoard ? removeFirstImgTag(template.text) : template.text;
+
+          await writeIframe.evaluate(
+            (bodyHandler, htmlStr: string) => {
+              bodyHandler.innerHTML = bodyHandler.innerHTML + htmlStr;
+            },
+            bodyHandler,
+            text
+          );
+
+          const saveBtnHandler = await boardIframe.$('a#cafewritebtn');
+          if (!saveBtnHandler) throw '글 작성 버튼 찾기 실패';
+          await saveBtnHandler?.click();
+          const linkUrlHandler = await boardIframe.waitForSelector('a#linkUrl', { visible: true });
+          const linkUrl = await boardIframe.evaluate(el => el.innerText, linkUrlHandler);
+          sendLogToRenderer({
+            workingId: working.workingId,
+            naverId: working.naverId,
+            cafeName: working.cafeName,
+            url: linkUrl,
+            text: '글 작성을 완료했습니다.',
+            type: '로그'
           });
         }
       };
 
-      console.log(write);
-
       // 현재 시간이 시간내인지 확인
-      // const { runTimes } = setting;
-      // setInterval();
+      const { runTimes } = setting;
+
+      const runTimeArr = [];
+      const runTimeKeys = Object.keys(runTimes);
+      for (let i = 0; i < runTimeKeys.length; i++) {
+        const key = runTimeKeys[i];
+        const value = runTimes[key];
+        if (value) {
+          runTimeArr.push(key);
+        }
+      }
+
+      console.log('시작');
+      sendLogToRenderer({ type: '로그', text: '작업을 시작합니다. 지정된 글쓰기 대기 시간동안 대기합니다.', })
+      jobs.push(
+        scheduleJob(
+          '*/' + setting.minPerWrite + ' ' + runTimeArr.join(',') + ' * * *',
+          async () => {
+            for (let i = 0; i < workings.length; i++) {
+              const working = workings[i];
+              await write(working);
+            }
+          }
+        )
+      );
     }
   );
 
@@ -316,10 +455,22 @@ const getLoggedBrowser = (naverId?: string) => {
   return result;
 };
 
-const uploadPhotoOnCafe = async (filePaths: Array<string>) => {
+const uploadPhotoOnCafe = async (
+  filePaths: Array<string>,
+  customPage?: Page,
+  customBrowser?: Browser
+) => {
   // 글쓰기 페이지에서 사진 추가 팝업 띄움
   try {
-    const { page, browser } = browsers.imageUpload;
+    let page: Page;
+    let browser: Browser;
+    if (customPage && customBrowser) {
+      page = customPage;
+      browser = customBrowser;
+    } else {
+      page = browsers.imageUpload.page;
+      browser = browsers.imageUpload.browser;
+    }
     if (!page) {
       throw Error('이미지 업로드용 브라우저가 실행되지 않았습니다.');
     }
@@ -362,6 +513,10 @@ const uploadPhotoOnCafe = async (filePaths: Array<string>) => {
     await editorFrame?.waitForSelector('body img');
     const imageHandlers = await editorFrame?.$$('body img');
 
+    if (customPage && customBrowser) {
+      return;
+    }
+
     const result = [];
     for (const hdl of imageHandlers || []) {
       result.push(
@@ -393,7 +548,7 @@ const initUploadImagePage = async (page: Page) => {
   // 카페 이동 후 글 쓰기 페이지까지 이동
   await Promise.all([
     page.goto(cafeUrl),
-    waitForNetworkIdle(page, 500, 0),
+    // waitForNetworkIdle(page, 500, 0),
     page.waitForNavigation({
       waitUntil: 'networkidle0'
     })

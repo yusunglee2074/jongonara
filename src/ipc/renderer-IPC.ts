@@ -1,9 +1,10 @@
-import { INaverId, ISetting, ITemplate, IWorking } from '../store/Store'
+import { getSettingsOnDB, INaverId, ISetting, ITemplate, IWorking } from '../store/Store';
 import { ipcRenderer } from 'electron';
 import { format } from 'date-fns';
 
 export const loginNaver = async (naverIds: Array<INaverId>) => {
-  return await ipcRenderer.invoke('loginNaver', naverIds);
+  const { debugMode } = await getSettingsOnDB();
+  return await ipcRenderer.invoke('loginNaver', naverIds, debugMode);
 };
 
 export const getNaverCafes = async (naverId: string) => {
@@ -18,18 +19,44 @@ export const saveFile = async (filePaths: Array<string>) => {
   return ipcRenderer.invoke('saveFile', filePaths);
 };
 
-export const run = async (workings: Array<IWorking>, templates: Array<ITemplate>, setting: ISetting) => {
-  ipcRenderer.on('logs', async (_e, ...args) => {
-    console.log(args, '로그 듣기');
-  });
-  return ipcRenderer.invoke('run', workings, templates, setting);
+export const getVersion = async () => {
+  return await ipcRenderer.invoke('getVersion');
 };
 
-export const stop = async () => {
-  await ipcRenderer.invoke('stop');
-  ipcRenderer.removeListener('logs', (...args) => {
-    console.log(args, '끝')
+export const listenUpdateAvailable = (updateAvailableCB: Function, downloadedCB: Function) => {
+  ipcRenderer.on('update_available', () => {
+    ipcRenderer.removeAllListeners('updateAvailable');
+    updateAvailableCB();
   });
+  ipcRenderer.on('update_downloaded', () => {
+    ipcRenderer.removeAllListeners('update_downloaded');
+    downloadedCB();
+  });
+}
+
+export const restartApp = async () => {
+  await ipcRenderer.invoke('restartApp');
+}
+
+export const run = async (
+  workings: Array<IWorking>,
+  templates: Array<ITemplate>,
+  setting: ISetting,
+  loggingCallbackFunc: Function
+) => {
+  ipcRenderer.on('logs', async (_e, log) => {
+    loggingCallbackFunc(log);
+  });
+  // We pass through JSON because in Electron >= 8, IPC uses v8's structured clone algorithm and throws errors if
+  // objects have functions
+  const iLikeJson = (obj: object) => JSON.parse(JSON.stringify(obj));
+
+  return ipcRenderer.invoke('run', iLikeJson(workings), iLikeJson(templates), iLikeJson(setting));
+};
+
+export const allStop = async () => {
+  await ipcRenderer.invoke('stop');
+  ipcRenderer.removeListener('logs', () => {});
 };
 
 export const saveFiles = async (blobArr: Array<Blob>) => {
