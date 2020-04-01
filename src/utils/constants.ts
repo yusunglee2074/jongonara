@@ -46,7 +46,7 @@ export const HOME_SCREEN_WORKING_TABLE_COL: Array<object> = [
   {
     title: '작성자 아이디',
     dataIndex: 'naverId',
-    key: 'naverId'
+    key: 'naverId',
   },
   {
     title: '카페 이름',
@@ -67,11 +67,6 @@ export const HOME_SCREEN_WORKING_TABLE_COL: Array<object> = [
     key: 'templateTitle'
   },
   {
-    title: '글 작성 간격(분)',
-    dataIndex: 'minPerWrite',
-    key: 'minPerWrite'
-  },
-  {
     title: '중복방지 기능',
     dataIndex: 'checkFourBoards',
     key: 'checkFourBoards',
@@ -82,12 +77,10 @@ export const HOME_SCREEN_WORKING_TABLE_COL: Array<object> = [
 
 ];
 
+export const APP_STRING = {
+  deletedId: '삭제된 아이디',
+}
 export const HOME_SCREEN_LOG_TABLE_COL: Array<object> = [
-  {
-    title: '시간',
-    dataIndex: 'datetime',
-    key: 'datetime'
-  },
   {
     title: '타입',
     dataIndex: 'type',
@@ -100,9 +93,14 @@ export const HOME_SCREEN_LOG_TABLE_COL: Array<object> = [
   },
   {
     title: '내용',
-    dataIndex: 'title',
-    key: 'title'
-  }
+    dataIndex: 'text',
+    key: 'text'
+  },
+  {
+    title: '카페명',
+    dataIndex: 'cafeName',
+    key: 'cafeName'
+  },
 ];
 
 export const PUPPETEER_BROWSER_OPTIONS_ARGS = [
@@ -112,7 +110,8 @@ export const PUPPETEER_BROWSER_OPTIONS_ARGS = [
   '--window-position=0,0',
   '--ignore-certifcate-errors',
   '--ignore-certifcate-errors-spki-list',
-  '--user-agent="Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/65.0.3312.0 Safari/537.36"'
+  '--user-agent="Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/65.0.3312.0 Safari/537.36"',
+  '--disable-extensions'
 ];
 
 

@@ -14,7 +14,7 @@ Platform:
   darwin x64
 
 Trace: 
-  SyntaxError: /Users/yusunglee2074/Desktop/Project/jongonara/front/package.json: Unexpected token } in JSON at position 2217
+  SyntaxError: /Users/yusunglee2074/Desktop/Project/jongonara/front/package.json: Unexpected token } in JSON at position 1954
       at JSON.parse (<anonymous>)
       at /Users/yusunglee2074/.yarn/lib/cli.js:1625:59
       at Generator.next (<anonymous>)
@@ -72,10 +72,6 @@ npm manifest:
     "build": {
       "productName": "jongonara",
       "appId": "org.yusunglee.jongonara",
-      "mac": {
-        "category": "public.app-category.developer-tools",
-        "publish": {}
-      },
       "directories": {
         "output": "release"
       },
@@ -86,14 +82,23 @@ npm manifest:
       ],
       "linux": {
         "target": "deb",
-        "publish": {}
+      },
+      "mac": {
+        "category": "public.app-category.developer-tools",
+        "publish": {
+          "provider": "github",
+          "owner": "yusunglee2074",
+          "private": true,
+          "protocol": "https"
+        }
       },
       "win": {
         "target": "nsis",
         "publish": {
           "provider": "github",
           "owner": "yusunglee2074",
-          "token":
+          "private": true,
+          "protocol": "https"
         }
       },
       "asar": true,
