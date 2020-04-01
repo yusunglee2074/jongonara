@@ -1,9 +1,7 @@
 import * as React from 'react';
-import { Checkbox, Col, Row, Select } from 'antd';
+import { Checkbox, Col, Row } from 'antd';
 import styled from 'styled-components';
 import { IWorking } from '../../../store/Store';
-
-const { Option } = Select;
 
 const S = {
   ContainerDiv: styled.div`
@@ -31,11 +29,6 @@ interface IProps {
 }
 
 const Tab4: React.FC<IProps> = ({ working, setWorking }) => {
-
-  const handleMinutesChange = (value: string) => {
-    setWorking({ ...working, minPerWrite: value });
-  };
-
   return (
     <S.ContainerDiv>
       <S.HeaderRow>
@@ -52,19 +45,6 @@ const Tab4: React.FC<IProps> = ({ working, setWorking }) => {
         ))}
         <p>템플릿 제목 {working.templateTitle}</p>
         <p>작동 설정</p>
-        <p>최소 글쓰기 간격</p>
-        <Select
-          defaultValue={working.minPerWrite ? working.minPerWrite.toString() : '10'}
-          style={{ width: 120 }}
-          onChange={handleMinutesChange}
-        >
-          <Option value="10">10분</Option>
-          <Option value="15">15분</Option>
-          <Option value="20">20분</Option>
-          <Option value="30">30분</Option>
-          <Option value="60">1시간</Option>
-          <Option value="120">2시간</Option>
-        </Select>
         <p>
           도배 방지 설정
           <Checkbox
