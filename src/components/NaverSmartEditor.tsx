@@ -64,7 +64,7 @@ const NaverSmartEditor: React.FC = () => {
         'function submitContents(elClickedObj) { oEditors.getById["ir1"].exec("UPDATE_CONTENTS_FIELD", []);};' +
         'function addText(text) { oEditors.getById["ir1"].exec("PASTE_HTML", [text]); }' +
         'function addImg(src, width) {' +
-        'var imageHTML = "<img width=\'" + width + "\' " + "src=\'" + src + "\' />";' +
+        'var imageHTML = "<img width=\'" + width + "\' " + "class=\'img-attachment\' src=\'" + src + "\' />";' +
         'console.log(imageHTML);' +
         'oEditors.getById["ir1"].exec("PASTE_HTML", [imageHTML]);' +
         '}' +
