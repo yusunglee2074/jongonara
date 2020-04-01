@@ -23,7 +23,6 @@ export interface ITemplate {
 
 export interface IWorking {
   workingId: string;
-  minPerWrite: number;
   checkFourBoards: boolean;
   naverId: string;
   cafeName: string;
@@ -40,10 +39,14 @@ export interface ILog {
   text?: string;
   workingId?: string;
   naverId?: string;
+  cafeName?: string;
+  url?: string;
 }
 
 export interface ISetting {
   runTimes: IRunTimes;
+  minPerWrite: number;
+  debugMode: boolean;
 }
 
 export interface IRunTimes {
