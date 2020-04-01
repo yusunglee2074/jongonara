@@ -1,1 +1,2 @@
-# 중고나라 자동등ㄹ록기
+# N카페 자동등록기 
+com.yusunglee.jongonara
