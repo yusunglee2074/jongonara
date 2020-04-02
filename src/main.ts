@@ -64,13 +64,12 @@ const createWindow = async () => {
     app.quit();
   });
 
-  win.once('ready-to-show', () => {
-    autoUpdater.checkForUpdatesAndNotify();
-  });
 };
 
 app.on('ready', async () => {
   await createWindow();
+  console.log("##############실행은 되냐?")
+  await autoUpdater.checkForUpdatesAndNotify();
 });
 
 app.on('window-all-closed', () => {
@@ -85,8 +84,10 @@ app.on('activate', async () => {
 });
 
 autoUpdater.on('updateAvailable', () => {
+  console.log("##############어베일")
   win?.webContents.send('updateAvailable');
 });
 autoUpdater.on('updateDownloaded', () => {
+  console.log("##############다운로디드")
   win?.webContents.send('updateDownloaded');
 });

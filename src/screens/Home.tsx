@@ -79,6 +79,7 @@ const HomeScreen: React.FunctionComponent = () => {
 
     listenUpdateAvailable(
       () => {
+        message.warn('콜백1')
         setUpdateModal({
           showModal: true,
           updateState: UpdateState.old,
@@ -86,6 +87,7 @@ const HomeScreen: React.FunctionComponent = () => {
         });
       },
       () => {
+        message.warn('콜백2')
         setUpdateModal({
           showModal: true,
           updateState: UpdateState.old,
