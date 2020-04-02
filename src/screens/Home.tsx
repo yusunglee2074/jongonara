@@ -315,7 +315,7 @@ const HomeScreen: React.FunctionComponent = () => {
           visible={showRunSettingsModal}
           handleCancel={(_: any) => setShowRunSettingsModal(!showRunSettingsModal)}
         />
-        <UpdateAvailableModal updateModal={updateModal} setUpdateModal={setUpdateModal} />
+        <UpdateAvailableModal updateModal={updateModal} />
       </Spin>
     </>
   );
