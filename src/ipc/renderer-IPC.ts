@@ -24,12 +24,12 @@ export const getVersion = async () => {
 };
 
 export const listenUpdateAvailable = (updateAvailableCB: Function, downloadedCB: Function) => {
-  ipcRenderer.on('update_available', () => {
+  ipcRenderer.on('updateAvailable', () => {
     ipcRenderer.removeAllListeners('updateAvailable');
     updateAvailableCB();
   });
-  ipcRenderer.on('update_downloaded', () => {
-    ipcRenderer.removeAllListeners('update_downloaded');
+  ipcRenderer.on('updateDownloaded', () => {
+    ipcRenderer.removeAllListeners('updateDownloaded');
     downloadedCB();
   });
 }
