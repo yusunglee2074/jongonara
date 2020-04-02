@@ -17,7 +17,12 @@ const UpdateAvailableModal: React.FC<IProps> = ({ updateModal, setUpdateModal })
   };
 
   return (
-    <Modal>
+    <Modal
+    visible={updateModal.showModal}
+    title="업데이트 확인"
+    cancelText={'확인'}
+    okButtonProps={{ hidden: true }}
+    >
       {updateModal.updateState === UpdateState.old
         ? '최신버전을 다운로드 중 입니다.'
         : '최신버전 다운로드가 완료 되었습니다.'}
