@@ -15,7 +15,7 @@
     "lint": "tslint '{src,test,mocks}/**/*.{ts,tsx}' --project ./tsconfig.json",
     "precommit": "lint-staged",
     "pack": "npm run build && electron-builder --dir",
-    "dist": "npm run build && electron-builder",
+    "dist": "npm run build && electron-builder -p always",
     "postinstall": "electron-builder install-app-deps"
   },
   "lint-staged": {
