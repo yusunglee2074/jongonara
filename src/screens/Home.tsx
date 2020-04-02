@@ -218,7 +218,7 @@ const HomeScreen: React.FunctionComponent = () => {
               <S.HeaderButton type="danger" ghost={true}>
                 로그아웃
               </S.HeaderButton>
-              <S.VersionSpan>버전!: {version}</S.VersionSpan>
+              <S.VersionSpan>버전: {version}</S.VersionSpan>
             </Col>
           </Row>
         </Header>
