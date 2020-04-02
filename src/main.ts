@@ -1,10 +1,11 @@
-import { app, BrowserWindow } from 'electron';
+import { app, BrowserWindow, Menu } from 'electron';
 import * as path from 'path';
 import * as url from 'url';
 import mainIPC from './ipc/main-IPC';
 const { autoUpdater } = require('electron-updater');
 
 // const serviceAccount = require("../jongonara-10b67-firebase-adminsdk-nevug-5bdda1479f.json");
+Menu.setApplicationMenu(null)
 
 export let win: BrowserWindow | null;
 
@@ -36,7 +37,10 @@ const createWindow = async () => {
   // Main IPC 설정
   await mainIPC();
 
-  // firebase 설정
+  // 프로그램 이름 변경 방지
+  win.on('page-title-updated', function(e) {
+    e.preventDefault()
+  });
 
   if (process.env.NODE_ENV !== 'production') {
     win.loadURL(`http://localhost:2003`);
