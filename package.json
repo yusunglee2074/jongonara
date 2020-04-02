@@ -64,7 +64,6 @@
       "publish": {
         "provider": "github",
         "owner": "yusunglee2074",
-        "private": true,
         "protocol": "https"
       }
     },
@@ -73,7 +72,6 @@
       "publish": {
         "provider": "github",
         "owner": "yusunglee2074",
-        "private": true,
         "protocol": "https"
       }
     },
@@ -86,7 +84,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/yusunglee2074/jongonara"
+    "url": "https://github.com/yusunglee2074/jongonara.git"
   },
   "author": {
     "name": "yusunglee2074",
