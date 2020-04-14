@@ -1,5 +1,3 @@
-import Runtime = jest.Runtime;
-
 const Store = require('electron-store');
 
 const store = new Store();
@@ -21,9 +19,14 @@ export interface ITemplate {
   text: string;
 }
 
+export interface IUserInfo {
+  loginId?: string;
+  expirationDate: string;
+  pcId?: string;
+}
+
 export interface IWorking {
   workingId: string;
-  checkFourBoards: boolean;
   naverId: string;
   cafeName: string;
   cafeUrl: string;
@@ -34,7 +37,7 @@ export interface IWorking {
 }
 
 export interface ILog {
-  createdAt?: string;
+  createdAt: string;
   type?: string;
   text?: string;
   workingId?: string;
@@ -47,6 +50,7 @@ export interface ISetting {
   runTimes: IRunTimes;
   minPerWrite: number;
   debugMode: boolean;
+  spamMode: boolean;
 }
 
 export interface IRunTimes {
@@ -129,7 +133,14 @@ export const setLogsOnDB = async (logs: Array<ILog>): Promise<Array<ILog>> => {
 export const getSettingsOnDB = async (): Promise<ISetting> => {
   try {
     const setting = await store.get('setting');
-    if (!setting) return { runTimes: {} as Runtime } as ISetting;
+    if (!setting) {
+      const tempObj = {} as IRunTimes;
+      for (let i = 0; i < 24; i++) {
+        const key = i < 10 ? i.toString() + '0' : i.toString();
+        tempObj[key] = true;
+      }
+      return { runTimes: tempObj } as ISetting;
+    }
     return setting;
   } catch (e) {
     throw Error(e.message);
@@ -140,6 +151,25 @@ export const setSettingsOnDB = async (setting: ISetting): Promise<ISetting> => {
   try {
     await store.set('setting', setting);
     return await store.get('setting');
+  } catch (e) {
+    throw Error(e.message);
+  }
+};
+
+export const getUserInfoOnDB = async (): Promise<IUserInfo> => {
+  try {
+    const userInfo = await store.get('userInfo');
+    if (!userInfo) return { expirationDate: new Date().toISOString() };
+    return userInfo;
+  } catch (e) {
+    throw Error(e.message);
+  }
+};
+
+export const setUserInfoOnDB = async (userInfo: IUserInfo): Promise<IUserInfo> => {
+  try {
+    await store.set('userInfo', userInfo);
+    return await store.get('userInfo');
   } catch (e) {
     throw Error(e.message);
   }

@@ -112,7 +112,7 @@ const NaverSmartEditor: React.FC = () => {
       <Spin tip="업로드 중 입니다..." spinning={loading}>
         <Row style={{ fontSize: 16 }}>
           <Col span={7}>
-            <span>본문에 사진추가</span>
+            <span>사진추가</span>
             <input type="file" accept="image/*" multiple onChange={handleUpload} />
             <span>사진 넓이</span>
             <InputNumber

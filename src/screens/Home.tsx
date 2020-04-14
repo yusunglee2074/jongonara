@@ -1,6 +1,8 @@
 import * as React from 'react';
 import { Button, Col, Layout, Row, Table, Spin, message, Modal, Radio } from 'antd';
 import styled from 'styled-components';
+import { isAfter } from 'date-fns';
+import { remote } from 'electron';
 
 import { APP_STRING, HOME_SCREEN_TEMPLATE_TABLE_COL } from '../utils/constants';
 import Step from '../components/Step';
@@ -14,6 +16,7 @@ import WorkingTable from '../components/WorkingTable';
 import LogTable from '../components/LogTable';
 import { format } from 'date-fns';
 import UpdateAvailableModal from '../components/UpdateAvailableModal';
+import differenceInDays from 'date-fns/fp/differenceInDays';
 
 const { Header, Content } = Layout;
 
@@ -59,7 +62,9 @@ const HomeScreen: React.FunctionComponent = () => {
     setLogs,
     setting,
     runningStatus,
-    setRunningStatus
+    setRunningStatus,
+    setAuthenticated,
+    userInfo
   } = useContext(RootContext);
   const [loading, setLoading] = useState(true);
   const [showRunSettingsModal, setShowRunSettingsModal] = useState(false);
@@ -79,7 +84,7 @@ const HomeScreen: React.FunctionComponent = () => {
 
     listenUpdateAvailable(
       () => {
-        message.warn('콜백1')
+        message.warn('콜백1');
         setUpdateModal({
           showModal: true,
           updateState: UpdateState.old,
@@ -87,7 +92,7 @@ const HomeScreen: React.FunctionComponent = () => {
         });
       },
       () => {
-        message.warn('콜백2')
+        message.warn('콜백2');
         setUpdateModal({
           showModal: true,
           updateState: UpdateState.old,
@@ -123,7 +128,7 @@ const HomeScreen: React.FunctionComponent = () => {
         await setNaverIdsOnDB(tempNaverIds);
       }
     } catch (e) {
-      console.log(e);
+      console.log(Object.keys(e));
     }
     setLoading(false);
   };
@@ -151,11 +156,12 @@ const HomeScreen: React.FunctionComponent = () => {
       return message.warn('작업목록에 있는 아이디를 먼저 로그인 버튼을 눌러 로그인 시켜주세요.');
 
     // 시작
-    const logging = async (log: ILog) => {
-      setLogs([log, ...logs]);
-      await setLogsOnDB([log, ...logs]);
+    const logging = async (newLogs: [ILog]) => {
+      await setLogs(
+        newLogs.sort((a, b) => (isAfter(new Date(a.createdAt), new Date(b.createdAt)) ? -1 : 1))
+      );
     };
-    await run(workings, templates, setting, logging);
+    await run(shouldRunWorkings, templates, setting, logging);
     setRunningStatus({ status: RunningStatus.Running });
   };
 
@@ -196,6 +202,15 @@ const HomeScreen: React.FunctionComponent = () => {
     setLogs([]);
   };
 
+  const logout = async () => {
+    setAuthenticated(false);
+  };
+
+  const goURL = async (e: any) => {
+    e.preventDefault();
+    await remote.shell.openExternal(e.target.href);
+  };
+
   return (
     <>
       <Spin tip="로그인 중 입니다..." spinning={loading}>
@@ -216,8 +231,15 @@ const HomeScreen: React.FunctionComponent = () => {
               </S.HeaderButton>
             </Col>
             <Col span={8}>
-              <S.HeaderSpan>남은 기간: X일</S.HeaderSpan>
-              <S.HeaderButton type="danger" ghost={true}>
+              <S.HeaderSpan>
+                남은 사용기간{' '}
+                {differenceInDays(new Date(), new Date(userInfo.expirationDate)) <= 0 ? (
+                  <span style={{ color: 'red' }}>만료</span>
+                ) : (
+                  differenceInDays(new Date(), new Date(userInfo.expirationDate)) + '일'
+                )}
+              </S.HeaderSpan>
+              <S.HeaderButton type="danger" ghost={true} onClick={logout}>
                 로그아웃
               </S.HeaderButton>
               <S.VersionSpan>버전: {version}</S.VersionSpan>
@@ -294,18 +316,25 @@ const HomeScreen: React.FunctionComponent = () => {
               )}
               extraCols={[
                 {
-                  title: 'url',
-                  render: (_: any, record: any) => {
-                    const { url } = record;
-                    return <a href={url}>{url}</a>;
-                  }
-                },
-                {
                   title: '시간',
+                  width: 120,
+                  order: 1,
                   render: (_: any, record: any) => {
                     const { createdAt } = record;
                     return format(new Date(createdAt), 'yy/MM/dd HH:mm');
                   }
+                },
+                {
+                  title: 'url',
+                  render: (_: any, record: any) => {
+                    const { url } = record;
+                    return (
+                      <a href={url} target="_blank" onClick={goURL}>
+                        {url}
+                      </a>
+                    );
+                  },
+                  width: 170
                 }
               ]}
             />

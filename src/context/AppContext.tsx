@@ -5,16 +5,21 @@ import {
   getNaverIdsOnDB,
   getSettingsOnDB,
   getTemplatesOnDB,
+  getUserInfoOnDB,
   getWorkingsOnDB,
   ILog,
   INaverId,
   IRunTimes,
   ISetting,
   ITemplate,
+  IUserInfo,
   IWorking
 } from '../store/Store';
+import { isAfter } from 'date-fns';
 
 interface IContextDefaultValue {
+  userInfo: IUserInfo;
+  setUserInfo: Function;
   authenticated: boolean;
   setAuthenticated: Function;
   isNaverLoggedIn: boolean;
@@ -47,6 +52,9 @@ export interface IRunning {
 const RootContext = React.createContext({} as IContextDefaultValue);
 
 const RootContextProvider = (props: any) => {
+  const [userInfo, setUserInfo] = useState({
+    expirationDate: new Date().toISOString()
+  } as IUserInfo);
   const [authenticated, setAuthenticated] = useState(false);
   const [isNaverLoggedIn, setIsNaverLoggedIn] = useState(false);
   const [contextUser, setContextUser] = useState({ err: {}, msg: '없음' });
@@ -64,8 +72,12 @@ const RootContextProvider = (props: any) => {
       setNaverIds(naverIdsOnDB.map(el => ({ ...el, connection: '로그인을 시도해주세요.' })));
       setTemplates(await getTemplatesOnDB());
       setWorkings(await getWorkingsOnDB());
-      setLogs(await getLogsOnDB());
+      const dbLogs = await getLogsOnDB();
+      setLogs(
+        dbLogs.sort((a, b) => (isAfter(new Date(a.createdAt), new Date(b.createdAt)) ? -1 : 1))
+      );
       setSetting(await getSettingsOnDB());
+      setUserInfo(await getUserInfoOnDB());
     };
 
     (async () => {
@@ -86,6 +98,8 @@ const RootContextProvider = (props: any) => {
   }, [naverIds]);
 
   const value = {
+    userInfo,
+    setUserInfo,
     authenticated,
     setAuthenticated,
     isNaverLoggedIn,

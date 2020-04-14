@@ -10,16 +10,16 @@ interface IProps {
   dataSource?: Array<ILog>;
 }
 
-const LogTable: React.FC<IProps> = ({
-  title,
-  extraCols = [],
-  dataSource = [],
-}) => {
+const LogTable: React.FC<IProps> = ({ title, extraCols = [], dataSource = [] }) => {
   return (
     <Table
       pagination={false}
       rowKey="createdAt"
-      columns={[...HOME_SCREEN_LOG_TABLE_COL, ...extraCols]}
+      columns={[...HOME_SCREEN_LOG_TABLE_COL, ...extraCols].sort((a: any, b: any) => {
+        if (!a.order) a.order = 100;
+        if (!b.order) b.order = 100;
+        return a.order < b.order ? -1 : 1;
+      })}
       dataSource={dataSource}
       scroll={{
         x: true,

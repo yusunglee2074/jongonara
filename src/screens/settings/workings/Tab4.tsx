@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Checkbox, Col, Row } from 'antd';
+import { Col, Row } from 'antd';
 import styled from 'styled-components';
 import { IWorking } from '../../../store/Store';
 
@@ -25,15 +25,14 @@ const S = {
 
 interface IProps {
   working: IWorking;
-  setWorking: Function;
 }
 
-const Tab4: React.FC<IProps> = ({ working, setWorking }) => {
+const Tab4: React.FC<IProps> = ({ working }) => {
   return (
     <S.ContainerDiv>
       <S.HeaderRow>
         <Col span={20}>
-          <S.ContainerTitleP>기타 셋팅 설정</S.ContainerTitleP>
+          <S.ContainerTitleP>작업 확인</S.ContainerTitleP>
         </Col>
       </S.HeaderRow>
       <S.BodyRow>
@@ -44,18 +43,6 @@ const Tab4: React.FC<IProps> = ({ working, setWorking }) => {
           <S.BoardNameP key={idx}>{el.name + (el.isTradeBoard ? '(거래)' : '(일반)')}</S.BoardNameP>
         ))}
         <p>템플릿 제목 {working.templateTitle}</p>
-        <p>작동 설정</p>
-        <p>
-          도배 방지 설정
-          <Checkbox
-            checked={working.checkFourBoards}
-            onChange={e => setWorking({ ...working, checkFourBoards: e.target.checked })}
-          />
-        </p>
-        <span>
-          * 해당 옵션을 사용할 경우 게시판별 작성글이 4개가 초과 될 떄마다 오늘 가장 먼저 작성한
-          글을 삭제 후 작성합니다.
-        </span>
       </S.BodyRow>
     </S.ContainerDiv>
   );

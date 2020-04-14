@@ -2,7 +2,6 @@ import { app, BrowserWindow, Menu } from 'electron';
 import * as path from 'path';
 import * as url from 'url';
 import mainIPC from './ipc/main-IPC';
-const { autoUpdater } = require('electron-updater');
 
 // const serviceAccount = require("../jongonara-10b67-firebase-adminsdk-nevug-5bdda1479f.json");
 Menu.setApplicationMenu(null)
@@ -68,9 +67,6 @@ const createWindow = async () => {
 
 app.on('ready', async () => {
   await createWindow();
-  win?.webContents.on('did-finish-load',() => {
-    autoUpdater.checkForUpdatesAndNotify();
-  });
 });
 
 app.on('window-all-closed', () => {
@@ -82,11 +78,4 @@ app.on('activate', async () => {
   if (win === null) {
     await createWindow();
   }
-});
-
-autoUpdater.on('update-available', () => {
-  win?.webContents.send('update-available');
-});
-autoUpdater.on('update-downloaded', () => {
-  win?.webContents.send('update-downloaded');
 });

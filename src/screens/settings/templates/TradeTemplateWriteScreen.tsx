@@ -94,7 +94,7 @@ const TradeTemplateWriteScreen: React.FC<RouteComponentProps> = ({ history }) =>
           onChange={e => setTemplate({ ...template, title: e.target.value })}
         />
         <Input
-          placeholder="태그와 태그는 쉼표로 구분하며, 10개까지 입력하실 수 있습니다."
+          placeholder="태그는 쉼표로 구분하며, 10개까지 입력하실 수 있습니다."
           value={template.tags}
           onChange={e => setTemplate({ ...template, tags: e.target.value })}
         />

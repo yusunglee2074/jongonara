@@ -7,11 +7,11 @@ import { RadioChangeEvent } from 'antd/lib/radio/interface';
 
 const S = {
   ContainerDiv: styled.div`
-    padding: 1rem;
   `,
   ContainerTitleP: styled.p`
     font-size: 1.3rem;
     font-weight: bold;
+    margin-bottom: 0;
   `,
   HeaderRow: styled(Row)`
     font-size: 2rem;
@@ -52,7 +52,7 @@ const Tab1: React.FC<IProps> = ({ naverId, setNaverId }) => {
     <S.ContainerDiv>
       <S.HeaderRow>
         <Col span={20}>
-          <S.ContainerTitleP>네이버 아이디 설정</S.ContainerTitleP>
+          <S.ContainerTitleP>아이디 선택</S.ContainerTitleP>
         </Col>
       </S.HeaderRow>
       <S.BodyRow>

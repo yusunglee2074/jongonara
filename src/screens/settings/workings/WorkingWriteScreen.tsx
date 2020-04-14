@@ -33,7 +33,6 @@ const WorkingWriteScreen: React.FC<RouteComponentProps> = () => {
   const [boardList, setBoardList] = useState([]);
   const [working, setWorking] = useState({
     workingId: '',
-    checkFourBoards: true,
     naverId: '',
     cafeName: '',
     cafeUrl: '',
@@ -67,7 +66,7 @@ const WorkingWriteScreen: React.FC<RouteComponentProps> = () => {
       case 2:
         return <Tab3 working={working} setWorking={(working: IWorking) => setWorking(working)} />;
       case 3:
-        return <Tab4 working={working} setWorking={(working: IWorking) => setWorking(working)} />;
+        return <Tab4 working={working} />;
       default:
         return <p>오류</p>;
     }

@@ -16,7 +16,7 @@ const AppRouter = () => {
         <Route path="/registration" component={RegistrationScreen} />
         <Route
           path="/"
-          render={() => (!authenticated ? <AppLayout /> : <Redirect to={'/login'} />)}
+          render={() => (authenticated ? <AppLayout /> : <Redirect to={'/login'} />)}
         />
       </Switch>
     </BrowserRouter>

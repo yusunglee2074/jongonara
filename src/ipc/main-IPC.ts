@@ -2,7 +2,7 @@ import * as puppeteer from 'puppeteer';
 import { Browser, ElementHandle, Page } from 'puppeteer';
 import { PUPPETEER_BROWSER_OPTIONS_ARGS } from '../utils/constants';
 import { app, ipcMain } from 'electron';
-import { ILog, INaverId, ISetting, ITemplate, IWorking } from '../store/Store';
+import { INaverId, ISetting, ITemplate, IWorking } from '../store/Store';
 import errorCodes from '../utils/errorCodes';
 import { win } from '../main';
 import * as fs from 'fs';
@@ -11,7 +11,7 @@ import * as stream from 'stream';
 import axios from 'axios';
 
 import { Job, scheduleJob } from 'node-schedule';
-import { autoUpdater } from 'electron-updater'
+import { autoUpdater } from 'electron-updater';
 
 const env = process.env.NODE_ENV;
 
@@ -53,13 +53,23 @@ const mainIPC = async () => {
     ignoreHTTPSErrors: true
   };
 
+  ipcMain.handle('checkUpdate', (_e: any) => {
+    autoUpdater.on('update-available', () => {
+      win?.webContents.send('update-available');
+    });
+    autoUpdater.on('update-downloaded', () => {
+      win?.webContents.send('update-downloaded');
+    });
+    autoUpdater.checkForUpdatesAndNotify();
+  });
+
   ipcMain.handle('getVersion', (_e: any) => {
     return app.getVersion();
-  })
+  });
 
   ipcMain.handle('restartApp', (_e: any) => {
     autoUpdater.quitAndInstall();
-  })
+  });
 
   ipcMain.handle(
     'loginNaver',
@@ -149,6 +159,7 @@ const mainIPC = async () => {
           }
         });
 
+        if (loginFailIds.length) return loginFailIds;
         // 이미지 업로드용 브라우저 하나더 띄우자
         const firstLoggedInBrowser = browsers[Object.keys(browsers)[0]];
         const { id, password } = firstLoggedInBrowser;
@@ -156,8 +167,8 @@ const mainIPC = async () => {
         const { page } = browsers.imageUpload;
 
         await initUploadImagePage(page);
-
         return loginFailIds;
+
       } catch (err) {
         throw Error(err);
       }
@@ -202,8 +213,9 @@ const mainIPC = async () => {
       throw Error(e);
     }
   });
-  const sendLogToRenderer = (log: ILog) => {
-    win?.webContents.send('logs', { ...log, createdAt: new Date() });
+  const sendLogToRenderer = (log: any) => {
+    console.log('센드로그 콜', log)
+    win?.webContents.send('logs', { ...log, createdAt: Date.now() + Math.floor(Math.random() * 100) });
   };
 
   const jobs: Array<Job> = [];
@@ -223,7 +235,15 @@ const mainIPC = async () => {
       // text: string;
       // workingId: string;
 
+      //TODO: 스팸방지기능
+      // const checkSpamAndDelete = async (working: IWorking) => {
+      //   // 게시판으로 이동
+      //   // 아이디로 검색
+      //   // 날짜에
+      // }
+
       const write = async (working: IWorking) => {
+        console.log('작업목록 working', working);
         const getFirstImgOnContent = async (templateText: string) => {
           let firstImgUrl = templateText;
           firstImgUrl = firstImgUrl.slice(firstImgUrl.indexOf('img-attachment'));
@@ -252,23 +272,18 @@ const mainIPC = async () => {
             throw e;
           }
         };
-        sendLogToRenderer({
-          text: '글 작성을 시도합니다.',
-          cafeName: working.cafeName,
-          type: '로그',
-          workingId: working.workingId,
-          naverId: working.naverId
-        });
         const [template] = templates.filter(el => el.title === working.templateTitle);
         for (let i = 0; i < working.boardNames.length; i++) {
-          const { url, isTradeBoard } = working.boardNames[i];
+          const { url, isTradeBoard, name } = working.boardNames[i];
           const { page, browser }: { page: Page; browser: Browser } = browsers[working.naverId];
 
-          console.log(i, '글 쓰러 이동합니다.', page.url());
-          await page.goto(url);
+          console.log(i, '글 쓰러 이동합니다.', page.url(), url);
           page.on('dialog', async dialog => {
             await dialog.accept();
+            await dialog.dismiss();
+            page.removeListener('dialog', () => {});
           });
+          await page.goto(url);
           // 글쓰기 버튼 클릭
           await page.waitForSelector('iframe');
           const boardIframeHandler = await page.$('iframe#cafe_main');
@@ -282,18 +297,17 @@ const mainIPC = async () => {
           await Promise.all([page.waitForSelector('iframe'), waitForNetworkIdle(page, 500, 0)]);
 
           // 글쓰기 권한 없는 게시판 아릶
-          const isWritePermissionScreen = await boardIframe.$('tit_level');
-          if (!isWritePermissionScreen) {
+          const isWritePermissionScreen = await boardIframe.$('p.tit_level');
+          if (isWritePermissionScreen !== null) {
             sendLogToRenderer({
               type: '에러',
               text: '권한이 없는 게시판이 포함되어있습니다.',
-              cafeName: working.cafeName,
+              cafeName: working.cafeName + `(${name})`,
               workingId: working.workingId,
               naverId: working.naverId
             });
-            return;
+            continue;
           }
-
           const iframeHandler = await page.$('div#main-area iframe');
           const frame = await iframeHandler?.contentFrame();
           if (!frame) throw Error('에러발생');
@@ -383,13 +397,20 @@ const mainIPC = async () => {
       }
 
       console.log('시작');
-      sendLogToRenderer({ type: '로그', text: '작업을 시작합니다. 지정된 글쓰기 대기 시간동안 대기합니다.', })
+      sendLogToRenderer({
+        type: '로그',
+        text: '작업을 시작합니다. 대기 시간동안 대기합니다.'
+      });
       jobs.push(
         scheduleJob(
           '*/' + setting.minPerWrite + ' ' + runTimeArr.join(',') + ' * * *',
           async () => {
             for (let i = 0; i < workings.length; i++) {
               const working = workings[i];
+              if (setting.spamMode) {
+                // TODO: 글 4개 이상인지 체크 후 이상이라면 삭제
+                // await checkSpamAndDelete(working);
+              }
               await write(working);
             }
           }

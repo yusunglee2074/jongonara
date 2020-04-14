@@ -66,15 +66,6 @@ export const HOME_SCREEN_WORKING_TABLE_COL: Array<object> = [
     dataIndex: 'templateTitle',
     key: 'templateTitle'
   },
-  {
-    title: '중복방지 기능',
-    dataIndex: 'checkFourBoards',
-    key: 'checkFourBoards',
-    render: (_: any, record: any) => {
-      return record.checkFourBoards ? '작동' : '미작동'
-    }
-  },
-
 ];
 
 export const APP_STRING = {
@@ -84,12 +75,15 @@ export const HOME_SCREEN_LOG_TABLE_COL: Array<object> = [
   {
     title: '타입',
     dataIndex: 'type',
-    key: 'type'
+    key: 'type',
+    width: 50,
+    order: 2,
   },
   {
     title: '네이버아이디',
     dataIndex: 'naverId',
-    key: 'naverId'
+    key: 'naverId',
+    width: 120,
   },
   {
     title: '내용',
@@ -99,7 +93,7 @@ export const HOME_SCREEN_LOG_TABLE_COL: Array<object> = [
   {
     title: '카페명',
     dataIndex: 'cafeName',
-    key: 'cafeName'
+    key: 'cafeName',
   },
 ];
 

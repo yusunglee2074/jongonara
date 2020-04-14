@@ -1,4 +1,4 @@
-import { getSettingsOnDB, INaverId, ISetting, ITemplate, IWorking } from '../store/Store';
+import { getLogsOnDB, getSettingsOnDB, INaverId, ISetting, ITemplate, IWorking, setLogsOnDB } from '../store/Store'
 import { ipcRenderer } from 'electron';
 import { format } from 'date-fns';
 
@@ -23,7 +23,11 @@ export const getVersion = async () => {
   return await ipcRenderer.invoke('getVersion');
 };
 
-export const listenUpdateAvailable = (updateAvailableCB: Function, downloadedCB: Function) => {
+export const listenUpdateAvailable = async (
+  updateAvailableCB: Function,
+  downloadedCB: Function
+) => {
+  await ipcRenderer.invoke('checkUpdate');
   ipcRenderer.on('update-available', () => {
     ipcRenderer.removeAllListeners('update-available');
     updateAvailableCB();
@@ -32,11 +36,11 @@ export const listenUpdateAvailable = (updateAvailableCB: Function, downloadedCB:
     ipcRenderer.removeAllListeners('update-downloaded');
     downloadedCB();
   });
-}
+};
 
 export const restartApp = async () => {
   await ipcRenderer.invoke('restartApp');
-}
+};
 
 export const run = async (
   workings: Array<IWorking>,
@@ -45,7 +49,10 @@ export const run = async (
   loggingCallbackFunc: Function
 ) => {
   ipcRenderer.on('logs', async (_e, log) => {
-    loggingCallbackFunc(log);
+    const logs = await getLogsOnDB();
+    const newLogs = [...logs, log];
+    await setLogsOnDB(newLogs)
+    await loggingCallbackFunc(newLogs);
   });
   // We pass through JSON because in Electron >= 8, IPC uses v8's structured clone algorithm and throws errors if
   // objects have functions

@@ -8,7 +8,6 @@ import { RadioChangeEvent } from 'antd/lib/radio/interface'
 
 const S = {
   ContainerDiv: styled.div`
-    padding: 1rem;
   `,
   ContainerTitleP: styled.p`
     font-size: 1.3rem;
@@ -125,7 +124,6 @@ const Tab2: React.FC<IProps> = ({
         <S.HeaderRow>
           <Col span={20}>
             <S.ContainerTitleP>카페, 게시판 설정</S.ContainerTitleP>
-            <S.ContainerTitleP>선택된 네이버 아이디: {working.naverId}</S.ContainerTitleP>
           </Col>
         </S.HeaderRow>
         <S.BodyRow>
