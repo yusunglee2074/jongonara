@@ -10,6 +10,9 @@ import { useState } from 'react';
 import { login } from '../../api';
 import { setUserInfoOnDB } from '../../store/Store';
 
+const env = remote.process.env.NODE_ENV;
+const appPath = remote.app.getAppPath();
+
 const S = {
   LogoImgDiv: styled.div`
     width: 5rem;
@@ -70,7 +73,10 @@ const LoginScreen: React.FunctionComponent<RouteComponentProps> = ({ history }) 
   return (
     <>
       <S.LogoImgDiv>
-        <S.LogoImg src="/public/icon.png" alt="로고이미지" />
+        <S.LogoImg
+          src={`${env === 'development' ? '' : appPath}/public/icon.png`}
+          alt="로고이미지"
+        />
       </S.LogoImgDiv>
       <S.TitleP>NEVER 카페 글 자동 등록기</S.TitleP>
       <S.FormDiv>

@@ -3,7 +3,7 @@ import axios from 'axios';
 const env = process.env.NODE_ENV;
 
 if (env !== 'development') {
-  axios.defaults.baseURL = '프로덕션 url';
+  axios.defaults.baseURL = 'http://yusunglee.asuscomm.com:3003/v1';
 } else {
   axios.defaults.baseURL = 'http://yusunglee.asuscomm.com:3003/v1';
 }
