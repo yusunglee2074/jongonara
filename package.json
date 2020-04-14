@@ -1,6 +1,6 @@
 {
   "name": "jongonara",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "N카페 자동 등록기",
   "main": "./dist/main.js",
   "scripts": {

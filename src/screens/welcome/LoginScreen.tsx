@@ -9,9 +9,16 @@ import { RootContext } from '../../context/AppContext';
 import { useState } from 'react';
 import { login } from '../../api';
 import { setUserInfoOnDB } from '../../store/Store';
+import * as path from 'path';
 
 const env = remote.process.env.NODE_ENV;
-const appPath = remote.app.getAppPath();
+let appPath: any;
+
+if (env === 'development') {
+  appPath = '';
+} else {
+  appPath = path.resolve(remote.app.getAppPath(), '..', 'app.asar.unpacked', 'dist');
+}
 
 const S = {
   LogoImgDiv: styled.div`
@@ -73,10 +80,7 @@ const LoginScreen: React.FunctionComponent<RouteComponentProps> = ({ history }) 
   return (
     <>
       <S.LogoImgDiv>
-        <S.LogoImg
-          src={`${env === 'development' ? '' : appPath}/public/icon.png`}
-          alt="로고이미지"
-        />
+        <S.LogoImg src={`${appPath}/public/icon.png`} alt="로고이미지" />
       </S.LogoImgDiv>
       <S.TitleP>NEVER 카페 글 자동 등록기</S.TitleP>
       <S.FormDiv>
