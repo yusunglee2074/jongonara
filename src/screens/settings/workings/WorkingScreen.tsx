@@ -1,9 +1,9 @@
 import * as React from 'react';
-import { Button, Row, Col, message } from 'antd';
+import { Button, message } from 'antd';
 import styled from 'styled-components';
 import { useContext, useEffect } from 'react';
 import { RootContext } from '../../../context/AppContext';
-import { setWorkingsOnDB } from '../../../store/Store'
+import { setWorkingsOnDB } from '../../../store/Store';
 import { Link, RouteComponentProps } from 'react-router-dom';
 import WorkingTable from '../../../components/WorkingTable';
 
@@ -14,6 +14,9 @@ const S = {
   ContainerTitleP: styled.p`
     font-size: 2rem;
     font-weight: bold;
+  `,
+  AddLinkDiv: styled.div`
+    margin-bottom: 1rem;
   `
 };
 
@@ -44,15 +47,12 @@ const WorkingScreen: React.FunctionComponent<RouteComponentProps> = ({ history }
 
   return (
     <S.ContainerDiv>
-      <S.ContainerTitleP>작업 관리 페이지</S.ContainerTitleP>
-      <Row>
-        <Col span={10}>
-          <Link to={'/setting-working-write'}>
-            <Button>작업 추가</Button>
-          </Link>
-        </Col>
-      </Row>
-
+      <S.ContainerTitleP>작업 설정</S.ContainerTitleP>
+      <S.AddLinkDiv>
+        <Link to={'/setting-working-write'}>
+          <Button type="primary">작업 추가</Button>
+        </Link>
+      </S.AddLinkDiv>
       <WorkingTable
         dataSource={workings}
         extraCols={[

@@ -5,18 +5,24 @@ import { IWorking } from '../../../store/Store';
 import TemplateTable from '../../../components/TemplateTable';
 import { useContext } from 'react';
 import { RootContext } from '../../../context/AppContext';
+import { LineOutlined } from '@ant-design/icons/lib';
 
 const S = {
-  ContainerDiv: styled.div`
-    padding: 1rem;
-  `,
+  ContainerDiv: styled.div``,
   ContainerTitleP: styled.p`
-    font-size: 1.3rem;
+    font-size: 1.9rem;
     font-weight: bold;
+    margin-bottom: 1rem;
   `,
-  BoardNameP: styled.p`
-    font-size: 1rem;
-    margin: 0;
+  ContainerSubTitleP: styled.p`
+    font-size: 1.4rem;
+    font-weight: bold;
+    margin-bottom: 0.5rem;
+  `,
+  SubDescriptionP: styled.p`
+    font-size: 1.2rem;
+    margin-bottom: 0.3rem;
+    color: #124a00;
   `,
   HeaderRow: styled(Row)`
     font-size: 2rem;
@@ -44,20 +50,34 @@ const Tab3: React.FC<IProps> = ({ working, setWorking }) => {
     <S.ContainerDiv>
       <S.HeaderRow>
         <Col span={20}>
-          <S.ContainerTitleP>템플릿 설정</S.ContainerTitleP>
-          <S.ContainerTitleP>선택된 네이버 아이디: {working.naverId}</S.ContainerTitleP>
-          <S.ContainerTitleP>선택된 카페: {working.cafeName}</S.ContainerTitleP>
-          <S.ContainerTitleP>선택된 게시판</S.ContainerTitleP>
+          <S.ContainerSubTitleP>선택된 네이버 아이디</S.ContainerSubTitleP>
+          <S.SubDescriptionP>
+            <LineOutlined /> {working.naverId}
+          </S.SubDescriptionP>
+          <S.ContainerSubTitleP>선택된 카페</S.ContainerSubTitleP>
+          <S.SubDescriptionP>
+            <LineOutlined /> {working.cafeName}
+          </S.SubDescriptionP>
+          <S.ContainerSubTitleP>선택된 게시판</S.ContainerSubTitleP>
           {working.boardNames.map((el, idx) => (
-            <S.BoardNameP key={idx}>
-              {el.name + (el.isTradeBoard ? '(거래)' : '(일반)')}
-            </S.BoardNameP>
+            <S.SubDescriptionP key={idx}>
+              <LineOutlined /> {el.name + (el.isTradeBoard ? ' (거래게시판)' : ' (일반게시판)')}
+            </S.SubDescriptionP>
           ))}
         </Col>
       </S.HeaderRow>
       <S.BodyRow>
-        <S.ContainerTitleP>선택된 템플릿 제목: {working.templateTitle}</S.ContainerTitleP>
-        <p>{working.isTrade ? '(거래)' : '(일반)'} 템플릿 목록</p>
+        <S.ContainerSubTitleP>선택된 템플릿</S.ContainerSubTitleP>
+        <S.SubDescriptionP>
+          {working.templateTitle ? (
+            <S.SubDescriptionP>
+              <LineOutlined /> {working.templateTitle}
+            </S.SubDescriptionP>
+          ) : (
+            <span>아래 목록에서 템플릿을 선택해주세요.</span>
+          )}
+        </S.SubDescriptionP>
+        <S.ContainerSubTitleP>{working.isTrade ? '거래' : '일반'} 템플릿 목록</S.ContainerSubTitleP>
         <TemplateTable
           dataSource={templates.filter(template => {
             if (working.isTrade) {

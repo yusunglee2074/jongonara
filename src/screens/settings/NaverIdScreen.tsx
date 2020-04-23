@@ -92,7 +92,7 @@ const NaverIdScreen: React.FunctionComponent = () => {
 
   return (
     <S.ContainerDiv>
-      <S.ContainerTitleP>네이버 아이디 추가/제거</S.ContainerTitleP>
+      <S.ContainerTitleP>네이버 아이디 설정</S.ContainerTitleP>
       <S.Form layout={'inline'} onSubmit={onSubmit}>
         <S.Input
           prefix={<Icon type="user" style={{ color: 'rgba(0,0,0,.25)' }} />}

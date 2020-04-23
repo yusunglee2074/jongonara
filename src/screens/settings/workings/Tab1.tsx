@@ -6,23 +6,25 @@ import { RootContext } from '../../../context/AppContext';
 import { RadioChangeEvent } from 'antd/lib/radio/interface';
 
 const S = {
-  ContainerDiv: styled.div`
-  `,
+  ContainerDiv: styled.div``,
   ContainerTitleP: styled.p`
-    font-size: 1.3rem;
+    font-size: 1.9rem;
     font-weight: bold;
-    margin-bottom: 0;
+    margin-bottom: 1rem;
   `,
   HeaderRow: styled(Row)`
     font-size: 2rem;
   `,
   BodyRow: styled(Row)`
     font-size: 2rem;
+    .ant-radio {
+      margin-bottom: 5px;
+    }
   `,
   Radio: styled(Radio)`
-    display: 'block',
-    height: '30px',
-    lineHeight: '30px',
+    font-size: 1.5rem;
+    display: block,
+    height: 30px,
   `
 };
 
@@ -52,7 +54,7 @@ const Tab1: React.FC<IProps> = ({ naverId, setNaverId }) => {
     <S.ContainerDiv>
       <S.HeaderRow>
         <Col span={20}>
-          <S.ContainerTitleP>아이디 선택</S.ContainerTitleP>
+          <S.ContainerTitleP>네이버 아이디 선택</S.ContainerTitleP>
         </Col>
       </S.HeaderRow>
       <S.BodyRow>

@@ -19,7 +19,7 @@ const { Sider } = Layout;
 const sideMenuArr = [
   { text: '메인 대시보드', iconType: 'home', goto: '/home' },
   { text: '네이버 아이디 설정', iconType: 'user', goto: '/setting-naver-id' },
-  { text: '작성 글 템플릿 설정', iconType: 'file-text', goto: '/setting-template' },
+  { text: '글 템플릿 설정', iconType: 'file-text', goto: '/setting-template' },
   { text: '작업 설정', iconType: 'play-circle', goto: '/setting-working' },
   { text: '결제/문의사항', iconType: 'setting', url: 'https://yusunglee.com' }
 ];
@@ -31,6 +31,7 @@ const AppLayout: React.FunctionComponent<RouteComponentProps> = ({ location }) =
     setCollapsed(collapsed);
   };
 
+  console.log('selectedKyes', location.pathname);
   return (
     <Layout style={{ minHeight: '100vh' }}>
       <Sider collapsible={true} collapsed={collapsed} onCollapse={onCollapse}>

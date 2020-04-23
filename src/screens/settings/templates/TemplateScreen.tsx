@@ -14,7 +14,10 @@ const S = {
   ContainerTitleP: styled.p`
     font-size: 2rem;
     font-weight: bold;
-  `
+  `,
+  AddButtonRow: styled(Row)`
+  margin-bottom: 1rem;
+  `,
 };
 
 const TemplateScreen: React.FunctionComponent = () => {
@@ -37,19 +40,19 @@ const TemplateScreen: React.FunctionComponent = () => {
 
   return (
     <S.ContainerDiv>
-      <S.ContainerTitleP>글 템플릿 관리 페이지</S.ContainerTitleP>
-      <Row>
-        <Col span={10}>
+      <S.ContainerTitleP>글 템플릿 설정</S.ContainerTitleP>
+      <S.AddButtonRow>
+        <Col span={12}>
           <Link to={'/setting-template-trade-write'}>
-            <Button>거래 글 추가</Button>
+            <Button type="primary">거래 글 추가</Button>
           </Link>
         </Col>
-        <Col span={10}>
+        <Col span={12}>
           <Link to={'/setting-template-normal-write'}>
-            <Button>일반 글 추가</Button>
+            <Button type="primary">일반 글 추가</Button>
           </Link>
         </Col>
-      </Row>
+      </S.AddButtonRow>
 
       <TemplateTable
         dataSource={templates}

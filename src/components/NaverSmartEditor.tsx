@@ -2,8 +2,26 @@ import * as React from 'react';
 import { remote } from 'electron';
 import { ChangeEvent, useEffect, useState } from 'react';
 import * as path from 'path';
-import { InputNumber, Col, Row, Spin } from 'antd';
+import { InputNumber, message, Spin } from 'antd';
 import { saveFile } from '../ipc/renderer-IPC';
+import styled from 'styled-components';
+
+const S = {
+  ImgAddDiv: styled.div`
+    font-size: 1rem;
+    border: 1px solid black;
+    margin: 0.5rem 0;
+    padding: 0.5rem;
+    p {
+      margin-top: 0.5rem;
+      margin-bottom: 0.3rem;
+    }
+  `,
+  ImgAddTitle: styled.p`
+    margin: 0;
+    font-size: 1.2rem;
+  `
+};
 
 // @ts-ignore
 const postscribe = require('postscribe');
@@ -85,23 +103,20 @@ const NaverSmartEditor: React.FC = () => {
 
   const handleUpload = async (e: ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
-      setLoading(true);
-      const filePaths = [];
-
-      for (let i = 0; i < e.target.files.length; i++) {
-        const file = e.target.files[i];
-        filePaths.push(file.path);
-      }
       try {
+        setLoading(true);
+        const filePaths = [];
+
+        for (let i = 0; i < e.target.files.length; i++) {
+          const file = e.target.files[i];
+          filePaths.push(file.path);
+        }
         const result = await saveFile(filePaths);
         for (let i = 0; i < result.length; i++) {
           addImgToEditor(result[i], width);
         }
       } catch (e) {
-        if (e.message.indexOf('browsers.imageUpload') > -1) {
-          //TODO: 에러 메시지
-          console.log('메인 대쉬보드에서 로그인을 먼저 진행해주세요.');
-        }
+        message.warn('로그인 상태가 풀렸습니다. 메인 대쉬보드에서 로그인을 다시 진행해주세요.');
       }
       setLoading(false);
     }
@@ -110,19 +125,24 @@ const NaverSmartEditor: React.FC = () => {
   return (
     <>
       <Spin tip="업로드 중 입니다..." spinning={loading}>
-        <Row style={{ fontSize: 16 }}>
-          <Col span={7}>
-            <span>사진추가</span>
-            <input type="file" accept="image/*" multiple onChange={handleUpload} />
-            <span>사진 넓이</span>
-            <InputNumber
-              min={100}
-              max={1080}
-              defaultValue={740}
-              onChange={(e: any) => setWidth(e.target.value)}
-            />
-          </Col>
-        </Row>
+        <S.ImgAddDiv>
+          <S.ImgAddTitle>본문 내 사진 추가</S.ImgAddTitle>
+          <p>1. 사진 넓이 설정(네이버 기본값 740)</p>
+          <InputNumber
+            min={100}
+            max={1080}
+            defaultValue={740}
+            onChange={value => value && setWidth(value)}
+          />
+          <p>2. 파일 선택</p>
+          <input
+            type="file"
+            accept="image/*"
+            multiple
+            onChange={handleUpload}
+            onClick={(e: any) => (e.target.value = null)}
+          />
+        </S.ImgAddDiv>
         <div id={'loadEditor'} />
         <div id={'editor'} />
         <div id={'afterEditor'} />

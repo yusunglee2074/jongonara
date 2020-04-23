@@ -11,6 +11,7 @@ import { useEffect } from 'react';
 
 const S = {
   ContainerDiv: styled.div`
+    width: 60rem;
     padding: 1rem;
   `,
   ContainerTitleP: styled.p`
@@ -22,6 +23,14 @@ const S = {
   `,
   BodyRow: styled(Row)`
     font-size: 2rem;
+  `,
+  InputNumber: styled(InputNumber)`
+    width: 20rem;
+    margin-right: 1rem;
+  `,
+  SaveButton: styled(Button)`
+    margin-top: 2rem;
+    width: 15rem;
   `
 };
 
@@ -81,24 +90,14 @@ const TradeTemplateWriteScreen: React.FC<RouteComponentProps> = ({ history }) =>
     <S.ContainerDiv>
       <S.HeaderRow>
         <Col span={20}>
-          <S.ContainerTitleP>거래글 쓰기 화면입니다.</S.ContainerTitleP>
-        </Col>
-        <Col span={4}>
-          <Button type="primary" onClick={save}>
-            저장
-          </Button>
+          <S.ContainerTitleP>거래 글 작성</S.ContainerTitleP>
         </Col>
         <Input
           placeholder="글 제목"
           value={template.title}
           onChange={e => setTemplate({ ...template, title: e.target.value })}
         />
-        <Input
-          placeholder="태그는 쉼표로 구분하며, 10개까지 입력하실 수 있습니다."
-          value={template.tags}
-          onChange={e => setTemplate({ ...template, tags: e.target.value })}
-        />
-        <InputNumber
+        <S.InputNumber
           placeholder="판매가격"
           defaultValue={template.price === 0 ? undefined : template.price}
           onChange={num => setTemplate({ ...template, price: num })}
@@ -131,6 +130,16 @@ const TradeTemplateWriteScreen: React.FC<RouteComponentProps> = ({ history }) =>
         </Col>
         <img src="" />
       </S.BodyRow>
+      <Input
+        placeholder="(옵션) 태그는 쉼표로 구분하며, 10개까지 입력하실 수 있습니다."
+        value={template.tags}
+        onChange={e => setTemplate({ ...template, tags: e.target.value })}
+      />
+      <div>
+        <S.SaveButton type="primary" onClick={save}>
+          저장
+        </S.SaveButton>
+      </div>
     </S.ContainerDiv>
   );
 };

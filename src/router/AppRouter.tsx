@@ -19,6 +19,7 @@ const AppRouter = () => {
           render={() => (authenticated ? <AppLayout /> : <Redirect to={'/login'} />)}
         />
       </Switch>
+      {/* 채팅 채널톡 이용 <Chatting />*/}
     </BrowserRouter>
   );
 };

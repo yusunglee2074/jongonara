@@ -10,6 +10,7 @@ import { RouteComponentProps } from 'react-router-dom';
 
 const S = {
   ContainerDiv: styled.div`
+    width: 60rem;
     padding: 1rem;
   `,
   ContainerTitleP: styled.p`
@@ -21,6 +22,10 @@ const S = {
   `,
   BodyRow: styled(Row)`
     font-size: 2rem;
+  `,
+  SaveButton: styled(Button)`
+    margin-top: 2rem;
+    width: 15rem;
   `
 };
 
@@ -65,6 +70,7 @@ const NormalTemplateWriteScreen: React.FunctionComponent<RouteComponentProps> = 
           try {
             await setTemplates(newTemplates);
             await setTemplatesOnDB(newTemplates);
+            history.push('/setting-template')
           } catch (e) {
             console.log(e);
             await setTemplates(prevTemplates);
@@ -78,23 +84,11 @@ const NormalTemplateWriteScreen: React.FunctionComponent<RouteComponentProps> = 
   return (
     <S.ContainerDiv>
       <S.HeaderRow>
-        <Col span={20}>
-          <S.ContainerTitleP>일반글 쓰기 화면입니다.</S.ContainerTitleP>
-        </Col>
-        <Col span={4}>
-          <Button type="primary" onClick={save}>
-            저장
-          </Button>
-        </Col>
+        <S.ContainerTitleP>일반 글 작성</S.ContainerTitleP>
         <Input
           placeholder="글 제목"
           value={template.title}
           onChange={e => setTemplate({ ...template, title: e.target.value })}
-        />
-        <Input
-          placeholder="태그는 쉼표로 구분하며, 10개까지 입력하실 수 있습니다."
-          value={template.tags}
-          onChange={e => setTemplate({ ...template, tags: e.target.value })}
         />
       </S.HeaderRow>
       <S.BodyRow>
@@ -102,6 +96,16 @@ const NormalTemplateWriteScreen: React.FunctionComponent<RouteComponentProps> = 
           <NaverSmartEditor />
         </Col>
       </S.BodyRow>
+      <Input
+        placeholder="태그는 쉼표로 구분하며, 10개까지 입력하실 수 있습니다."
+        value={template.tags}
+        onChange={e => setTemplate({ ...template, tags: e.target.value })}
+      />
+      <div>
+        <S.SaveButton type="primary" onClick={save}>
+          저장
+        </S.SaveButton>
+      </div>
     </S.ContainerDiv>
   );
 };

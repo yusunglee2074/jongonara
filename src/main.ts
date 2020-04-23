@@ -26,7 +26,7 @@ const createWindow = async () => {
   win = new BrowserWindow({
     title: '네이버 카페 자동 등록기',
     width: 1500,
-    height: 720,
+    height: 700,
     webPreferences: {
       nodeIntegration: true,
       webSecurity: false

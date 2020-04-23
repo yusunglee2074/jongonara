@@ -264,7 +264,7 @@ const HomeScreen: React.FunctionComponent = () => {
                   y: true
                 }}
                 size={'small'}
-                title={() => <Step text="작성 글 템플릿" goto={'/setting-template'} />}
+                title={() => <Step text="템플릿 목록" goto={'/setting-template'} />}
                 locale={{
                   emptyText: '최소 하나의 데이터를 넣어주세요.'
                 }}
@@ -291,6 +291,7 @@ const HomeScreen: React.FunctionComponent = () => {
               extraCols={[
                 {
                   title: '아이디 변경',
+                  width: 100,
                   render: (_: any, record: any) => {
                     const { naverId } = record;
                     if (naverId === APP_STRING.deletedId) {

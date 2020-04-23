@@ -14,7 +14,7 @@ const S = {
     font-size: 1rem;
   `,
   StepLink: styled(Link)`
-    margin-left: 1rem;
+    margin: 0 0.5rem;
   `,
 };
 
@@ -28,9 +28,9 @@ const Step: React.FunctionComponent<{
       <Row type="flex" style={{ alignItems: 'center' }}>
         <S.StepTitleSpan>{text}</S.StepTitleSpan>
         <S.StepLink to={goto}>
-          <Button icon="setting" />
+          <Button icon="edit" />
         </S.StepLink>
-        {login && <Button onClick={() => login()}>로그인</Button>}
+        {login && <Button type="primary" onClick={() => login()}>로그인</Button>}
       </Row>
     </S.StepDiv>
   );
