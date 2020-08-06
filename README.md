@@ -1,10 +1,9 @@
 # N카페 자동등록기 
-com.yusunglee.jongonara
-
-## 업데이트 방법
-1. 버전명 수정
-2. yarn dist
-3. github에서 출시 mac 포함 출시 진행
+[서비스 링크](https://yusunglee.com)
 
 
-https://github.com/iffy/electron-updater-example
+# 잡담
+개발자가 개발만 하기도 벅찬데 마케팅, 기획, 디자인 등 까지 신경 쓰는것이 얼마나 힘든지 느꼈다.
+유료 결제 한 사람은 없지만 하수구 막히거나 집수리하시는 아시는 분이 자기 동네카페에 쓰겠다 하셔서 유료 계정을 드렸는데  
+사용하시다가 버그도 찾아주시는 것 보니 뿌듯했다.  
+끝.
